@@ -7,14 +7,13 @@ In the presence of music or common environmental noise create a software which i
 - Target use case: User device verification using audio as an input. 
 - Tech stack: 
 
-## Datasets
+## Datasets and Research
 - https://www.isca-archive.org/interspeech_2020/chowdhury20b_interspeech.html
 - https://zenodo.org/records/1442513
 - https://arxiv.org/abs/2406.04140
 - https://defined.ai/datasets/vocal-music-tracks
 
 ## Project Plan (current)
-- Goal: verify a registered speaker in the presence of music or environmental noise by prompting a short random phrase and allowing access only when the enrolled speaker is detected.
 - MVP target: >90% genuine-accept and <5% impostor-accept at SNRs down to ~0 dB on a small validation set.
 - Scope: single-user enrollment with a few enrollment utterances; evaluation focused on verification (yes/no) not transcription.
 
