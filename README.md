@@ -1,40 +1,37 @@
-# music-singer-recognition
+# Voice Verification With Noise
 
-Detect whether recorded audio is human or AI-generated and, for human vocals, recognize the artist/singer.
+In the presence of music or common environmental noise create a software which is able to recognize a given user's voice to unlock a device. The device should only be unlocked given the registered user's voice which will be analyzed by prompting the user to repeat a set of random words to be analyzed. 
 
 ## Project Focus
-- Build a centralized classification pipeline for audio deepfake detection and singer identification.
-- Target use case: flag synthetic vocals and attribute genuine recordings to known artists.
-- Skills welcomed: audio feature engineering, deep learning for audio, Python-based data science.
+- Build a centralized classification pipeline for audio detection and isolation of users voice.
+- Target use case: User device verification using audio as an input. 
+- Tech stack: 
 
 ## Datasets
-- Deepfake Detection Challenge (DFDC): https://ai.meta.com/datasets/dfdc/
-- Kaggle Deepfake Detection Challenge: https://www.kaggle.com/c/deepfake-detection-challenge
-- LJ Speech: https://keithito.com/LJ-Speech-Dataset/
-- WaveFake (synthetic speech) via Zenodo: https://zenodo.org/records/5642694
-
 - https://www.isca-archive.org/interspeech_2020/chowdhury20b_interspeech.html
 - https://zenodo.org/records/1442513
 - https://arxiv.org/abs/2406.04140
 - https://defined.ai/datasets/vocal-music-tracks
 
-## Reference Code and Resources
-- WaveFake baseline: https://github.com/RUB-SysSec/WaveFake
-- Audio deepfake detection examples: https://github.com/MarkHershey/AudioDeepFakeDetection?tab=readme-ov-file
+## Project Plan (current)
+- Goal: verify a registered speaker in the presence of music or environmental noise by prompting a short random phrase and allowing access only when the enrolled speaker is detected.
+- MVP target: >90% genuine-accept and <5% impostor-accept at SNRs down to ~0 dB on a small validation set.
+- Scope: single-user enrollment with a few enrollment utterances; evaluation focused on verification (yes/no) not transcription.
 
-## Papers and Background Reading
-- Khalid, Hasam, et al. "FakeAVCeleb: A novel audio-video multimodal deepfake dataset." arXiv:2108.05080 (2021).
-- Wijethunga, R. L. M. A. P. C., et al. "Deepfake audio detection: a deep learning based solution for group conversations." ICAC 2020.
-- Khanjani, Zahra, Gabrielle Watson, and Vandana P. Janeja. "How deep are the fakes? focusing on audio deepfake: A survey." arXiv:2111.14203 (2021).
-- Hamza, Ameer, et al. "Deepfake audio detection via MFCC features using machine learning." IEEE Access 10 (2022): 134018-134028.
+## Pipeline Outline
+- Data prep: curate clean speech per enrolled user; mix with music/noise at varied SNRs; hold out speakers for impostor trials.
+- Feature extraction: log-mel spectrograms + optional voice activity detection; experiment with MFCC as baseline.
+- Modeling: start with x-vector/ECAPA-TDNN embeddings + cosine/PLDA scoring; compare with a compact CNN or wav2vec-style frozen encoder + linear head.
+- Evaluation: equal error rate (EER), minDCF, ROC/DET curves across SNR bands; measure latency on CPU-only path.
+- Serving sketch: lightweight inference script that records phrase, performs VAD, embeds, and scores against enrolled template; refuse unlock on low confidence or too-short audio.
 
-- “Automatic singer recognition of popular music recordings…” — older but classic method for singerhttps://ntut.elsevierpure.com/en/publications/automatic-singer-recognition-of-popular-music-recordings-via-esti?utm_source=chatgpt.com
-- Singer Identification Using Deep Timbre Feature Learning with KNN-Net” — ArXiv paper on singer identification with learned timbre features.  ￼
-  https://arxiv.org/abs/2102.10236  ￼
-- JukeBox: A Multilingual Singer Recognition Dataset”
-  Chowdhury, Cozzo & Ross — introduces a singing dataset for multilingual singer recognition.  ￼
-  Paper PDF: https://www.cse.msu.edu/~rossarun/pubs/ChowdhuryCozzoRossJukeBox_INTERSPEECH2020.pdf
+## Baseline Checklist
+- Implement data mixer that layers speech with music/noise at randomized SNRs and start times.
+- Train a simple MFCC + cosine baseline for a quick ceiling/floor.
+- Implement x-vector or ECAPA-TDNN baseline with pretrained weights where possible; fine-tune on mixed data.
+- Add evaluation harness for EER/minDCF and noise-stratified metrics; plot ROC/DET.
+- Package a CLI demo (enroll, verify) for the enrolled user.
 
 ## Contacts
-- Originator: Brandon (brandonrogers@uvic.ca)
-- Potential collaborators: Owen Lutwyche (owenoel333@gmail.com), Carter Conboy (carterconboy@uvic.ca)
+- Originator: Liam Degand (liamdegand@uvic.ca)
+- Potential collaborators: Leeland 
