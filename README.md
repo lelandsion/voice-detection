@@ -12,6 +12,9 @@ In the presence of music or common environmental noise create a software which i
 - https://zenodo.org/records/1442513
 - https://arxiv.org/abs/2406.04140
 - https://defined.ai/datasets/vocal-music-tracks
+- https://ieeexplore.ieee.org/abstract/document/6732927
+- https://ieeexplore.ieee.org/abstract/document/7603830
+- https://www.researchgate.net/profile/Harika-Kotha/publication/342956180_Voice_Identification_in_Python_Using_Hidden_Markov_Model/links/5f0eff2b92851c1eff11e854/Voice-Identification-in-Python-Using-Hidden-Markov-Model.pdf
 
 ## Project Plan (current)
 - MVP target: >90% genuine-accept and <5% impostor-accept at SNRs down to ~0 dB on a small validation set.
@@ -33,4 +36,4 @@ In the presence of music or common environmental noise create a software which i
 
 ## Contacts
 - Originator: Liam Degand (liamdegand@uvic.ca)
-- Potential collaborators: Leeland 
+- Potential collaborators: Leland 
