@@ -41,4 +41,4 @@ In the presence of music or common environmental noise create a software which i
 
 ## Contacts
 - Originator: Liam Degand (liamdegand@uvic.ca)
-- Potential collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com)
+- Potential collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com) 
