@@ -34,6 +34,11 @@ In the presence of music or common environmental noise create a software which i
 - Add evaluation harness for EER/minDCF and noise-stratified metrics; plot ROC/DET.
 - Package a CLI demo (enroll, verify) for the enrolled user.
 
+## Resources (links)
+- Overleaf project: https://www.overleaf.com/project/69790f5fbd108f1a4df5de62
+- ISMIR 2025 templates: https://www.overleaf.com/latex/templates/paper-template-for-ismir-2025/xnqdhjhdgsfd
+- Recent ISMIR submission: https://ismir2025program.ismir.net/papers.html?filter=keywords
+
 ## Contacts
 - Originator: Liam Degand (liamdegand@uvic.ca)
-- Potential collaborators: Leland 
+- Potential collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com)
