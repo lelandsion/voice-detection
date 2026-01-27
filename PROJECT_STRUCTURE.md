@@ -1,6 +1,6 @@
 # Voice Verification With Noise (Live Demo) — Project Structure
 
-> Note: Keep all tasks unassigned by default. Only the Project itself should be assigned to the requester and Leland.
+> Note: Keep all tasks unassigned by default in GitHub. The assignee names below are **suggested owners** for clarity; only the Project itself should be assigned to the requester and Leland.
 
 ## GitHub Project (1 board)
 - **Name:** Voice Verification With Noise (Live Demo)
