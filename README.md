@@ -21,7 +21,7 @@ In the presence of music or common environmental noise create a software which i
 - Scope: single-user enrollment with a few enrollment utterances; evaluation focused on verification (yes/no) not transcription.
 
 ## Project Board / Milestones / Issues
-- See `PROJECT_STRUCTURE.md` for the GitHub Project, milestones, issues, labels, and roles for **Voice Verification With Noise (Live Demo)**. The project board should be assigned only to the requester and Leland; individual issues remain unassigned by default.
+- See `PROJECT_STRUCTURE.md` for the GitHub Project, milestones, issues, labels, and roles for **Voice Verification With Noise (Live Demo)**. The project board should be owned by the requester and Leland; individual issues remain unassigned by default.
 
 ## Pipeline Outline
 - Data prep: curate clean speech per enrolled user; mix with music/noise at varied SNRs; hold out speakers for impostor trials.
