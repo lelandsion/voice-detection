@@ -14,7 +14,7 @@
 ## Milestones (deliverables)
 - **M1 — Design/Requirements Spec** — Target: **Feb 7, 2026**  
   Deliverable: PDF + sources (Overleaf or paper/).  
-  Acceptance: describe project overview (abstract), requirements (threat model, constraints, metrics EER/minDCF, FAR/FRR), demo requirements, tools/datasets (provisional ok), timeline w/ objectives + roles, related work 15–20 refs, 2-4 pages long in ISMIR template.
+  Acceptance: describe project overview (abstract), requirements (threat model, constraints, metrics EER/minDCF, FAR/FRR), demo requirements, tools/datasets (provisional ok), timeline w/ objectives + roles, related work (has someone done something similar and what can we learn from them), 15–20 refs (datasets, tools etc.), 2-4 pages long in ISMIR template.
   Owner: **Member 3 (integration); all contribute refs**
 
 - **M2 — Data + Mixing Pipeline** — Target: **Feb 21, 2026**  
