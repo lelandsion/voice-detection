@@ -1,47 +1,35 @@
 # Voice Verification With Noise
+Music Information Retrieval (CSC 475)
 
-In the presence of music or common environmental noise create a software which is able to recognize a given user's voice to unlock a device. The device should only be unlocked given the registered user's voice which will be analyzed by prompting the user to repeat a set of random words to be analyzed. 
+    Originator: Liam Degand (liamdegand@uvic.ca)
+    Collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com)
 
-## Project Focus
-- Build a centralized classification pipeline for audio detection and isolation of users voice.
-- Target use case: User device verification using audio as an input. 
-- Tech stack: 
 
-## Datasets and Research
-- https://www.isca-archive.org/interspeech_2020/chowdhury20b_interspeech.html
-- https://zenodo.org/records/1442513
-- https://arxiv.org/abs/2406.04140
-- https://defined.ai/datasets/vocal-music-tracks
-- https://ieeexplore.ieee.org/abstract/document/6732927
-- https://ieeexplore.ieee.org/abstract/document/7603830
-- https://www.researchgate.net/profile/Harika-Kotha/publication/342956180_Voice_Identification_in_Python_Using_Hidden_Markov_Model/links/5f0eff2b92851c1eff11e854/Voice-Identification-in-Python-Using-Hidden-Markov-Model.pdf
+## Project Overview (Abstract)
+Voice-based authentication has emerged as a convenient and secure method for device access control. However, real-world deployment scenarios often involve challenging acoustic conditions, including background music and environmental noise, which significantly degrade verification performance. This paper presents a noise-robust voice verification system designed for device unlock authentication under signal-to-noise ratios (SNRs) as low as 0 dB. The system employs text-dependent speaker verification using random word prompts to authenticate enrolled users while defending against casual imposter attempts. Our target performance criteria are greater than 90% genuine acceptance rate with less than 5% impostor acceptance rate at 0 dB SNR. This project culminates in a live demonstration system that validates the approach using real-time microphone input to detect speech, extract voice features, and authenticate users.
 
-## Project Plan (current)
-- MVP target: >90% genuine-accept and <5% impostor-accept at SNRs down to ~0 dB on a small validation set.
-- Scope: single-user enrollment with a few enrollment utterances; evaluation focused on verification (yes/no) not transcription.
+## Tools and Datasets
+[]
 
-## Project Board / Milestones / Issues
-- See `PROJECT_STRUCTURE.md` for the GitHub Project, milestones, issues, labels, and roles for **Voice Verification With Noise (Live Demo)**. The project board should be owned by the requester and Leland; individual issues remain unassigned by default.
+## Related Work
+[]
 
-## Pipeline Outline
-- Data prep: curate clean speech per enrolled user; mix with music/noise at varied SNRs; hold out speakers for impostor trials.
-- Feature extraction: log-mel spectrograms + optional voice activity detection; experiment with MFCC as baseline.
-- Modeling: start with x-vector/ECAPA-TDNN embeddings + cosine/PLDA scoring; compare with a compact CNN or wav2vec-style frozen encoder + linear head.
-- Evaluation: equal error rate (EER), minDCF, ROC/DET curves across SNR bands; measure latency on CPU-only path.
-- Serving sketch: lightweight inference script that records phrase, performs VAD, embeds, and scores against enrolled template; refuse unlock on low confidence or too-short audio.
-
-## Baseline Checklist
-- Implement data mixer that layers speech with music/noise at randomized SNRs and start times.
-- Train a simple MFCC + cosine baseline for a quick ceiling/floor.
-- Implement x-vector or ECAPA-TDNN baseline with pretrained weights where possible; fine-tune on mixed data.
-- Add evaluation harness for EER/minDCF and noise-stratified metrics; plot ROC/DET.
-- Package a CLI demo (enroll, verify) for the enrolled user.
-
-## Resources (links)
-- Overleaf project: https://www.overleaf.com/project/69790f5fbd108f1a4df5de62
-- ISMIR 2025 templates: https://www.overleaf.com/latex/templates/paper-template-for-ismir-2025/xnqdhjhdgsfd
-- Recent ISMIR submission: https://ismir2025program.ismir.net/papers.html?filter=keywords
-
-## Contacts
-- Originator: Liam Degand (liamdegand@uvic.ca)
-- Potential collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com) 
+## Research and References
+| Title | URL | Summary | Citation (IEEE) | Sourced by |
+|------|-----|---------|----------------|-----------|
+| Voice recognition based on adaptive MFCC and deep learning | [link](https://ieeexplore.ieee.org/abstract/document/7603830) | Proposes an enhanced voice recognition method using Adaptive MFCC and deep learning, addressing noise-removal issues that degrade audio quality in existing algorithms. | H.-S. Bae, H.-J. Lee, and S.-G. Lee, “Voice recognition based on adaptive MFCC and deep learning,” in *Proc. 2016 IEEE 11th Conf. on Industrial Electronics and Applications (ICIEA)*, Hefei, China, Jun. 2016, pp. 1542–1546, doi: 10.1109/ICIEA.2016.7603830. | Leland |
+| Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint | [link](https://ieeexplore.ieee.org/abstract/document/10709042) | Explores smartphone voiceprint unlocking using MFCC-based voice texture recognition, comparing it to fingerprint unlocking and emphasizing personalization and convenience. | H.-S. Bae, H.-J. Lee, and S.-G. Lee, “Voice recognition based on adaptive MFCC and deep learning,” in *Proc. 2016 IEEE 11th Conf. on Industrial Electronics and Applications (ICIEA)*, Hefei, China, Jun. 2016, pp. 1542–1546, doi: 10.1109/ICIEA.2016.7603830. | Leland |
+| Voice Activity Detection (VAD) in Noisy Environments | [link](https://arxiv.org/abs/2312.05815)<br>[link](https://arxiv.org/pdf/2312.05815) | Focuses on isolating speech from diverse background noise using a Voice Activity Detection (VAD) system. | J. Ball, “Voice Activity Detection (VAD) in Noisy Environments,” *arXiv*, 2023. https://arxiv.org/abs/2312.05815 | Lilly |
+| Quality measures for speaker verification with short utterances | [link](https://www.sciencedirect.com/science/article/abs/pii/S1051200418304287) | Addresses reliable speaker verification using short utterances by combining match and quality scores derived from zero-order Baum–Welch statistics using GMM-UBM. | S. Das, J. Yang, and J. H. L. Hansen, “Quality measures for speaker verification with short utterances,” *Digital Signal Processing*, vol. 88, pp. 66–79, May 2019, doi: https://doi.org/10.1016/j.dsp.2019.01.023. | Lilly |
+| Speaker Recognition in Noisy Environments | [link](https://mirkomarras.github.io/dl-voice-noise/) | Describes a deep-learning–based speaker recognition system evaluated under multiple noise types and SNR levels in realistic smart-environment conditions. | M. Marras, “Speaker recognition in noisy environments,” project page, 2019. | Liam |
+| Active Voice Authentication | [link](https://www.sciencedirect.com/science/article/abs/pii/S1051200420300178?via%3Dihub) | Explores continuous speaker verification that monitors and validates a user’s voice in real time using very short voice samples. | Z. Meng, M. U. B. Altaf, and B.-H. (Fred) Juang, “Active voice authentication,” *Digital Signal Processing*, vol. 101, p. 102672, Jun. 2020, doi: https://doi.org/10.1016/j.dsp.2020.102672. | Lilly |
+| Mozilla Common Voice: An Open Multilingual Speech Corpus for Machine Learning | [link](https://commonvoice.mozilla.org) | Open, community-driven multilingual speech dataset with validated transcripts, designed to support inclusive and accessible ASR research. | Mozilla Common Voice Dataset, Mozilla Foundation, 2020. [Online]. Available: https://commonvoice.mozilla.org. Accessed: Feb. 3, 2026. | Leland |
+| AudioUnlock: Device-to-Device Authentication via Acoustic Fingerprints | [link](https://pmc.ncbi.nlm.nih.gov/articles/PMC12609154/) | Presents an acoustic fingerprint–based authentication scheme for smartphones using speakers and microphones as physical identifiers, robust to environmental conditions and attacks. | M. A. Alghamdi et al., “AudioUnlock: Device-to-device authentication via acoustic fingerprints,” *Proc. ACM Interact. Mob. Wearable Ubiquitous Technol.*, vol. 9, no. 3, Oct. 2025. | Liam |
+| MUSAN: A Music, Speech, and Noise Corpus | [link](https://arxiv.org/abs/1510.08484) | Open dataset of music, speech, and noise widely used for data augmentation in speaker verification by mixing clean speech with controlled SNR noise. | D. Snyder, G. Chen, and D. Povey, “MUSAN: A music, speech, and noise corpus,” *arXiv preprint* arXiv:1510.08484, 2015. | Liam |
+| An unsupervised deep domain adaptation approach for robust speech recognition | [link](https://www.sciencedirect.com/science/article/abs/pii/S0925231217301492) | Applies DNN-HMM systems with Deep Domain Adaptation training to improve speech recognition robustness in noisy environments. | S. Sun, B. Zhang, L. Xie, and Y. Zhang, “An unsupervised deep domain adaptation approach for robust speech recognition,” *Neurocomputing*, vol. 257, pp. 79–87, Sept. 2017, doi: https://doi.org/10.1016/j.neucom.2016.12.063. | Lilly |
+| Speaker Verification Using Adapted Gaussian Mixture Models | [link](https://www.sciencedirect.com/science/article/abs/pii/S1051200499903615) | Uses Gaussian Mixture Models (GMMs) to model the statistical characteristics of a speaker’s voice for verification. | B. H. Juang and S. Furui, “Automatic recognition and understanding of spoken language – a first step toward natural human-machine communication,” *Proc. IEEE*, vol. 88, no. 8, pp. 1142–1165, Aug. 2000, doi: https://doi.org/10.1109/5.880077. | Lilly |
+| An Overview of Noise-Robust Automatic Speech Recognition | [link](https://ieeexplore.ieee.org/abstract/document/6732927) | Surveys methods for improving ASR robustness to real-world noise and acoustic distortions driven by consumer voice applications. | J. Li, L. Deng, Y. Gong, and R. Haeb-Umbach, “An overview of noise-robust automatic speech recognition,” *IEEE/ACM Trans. Audio, Speech, Lang. Process.*, vol. 22, no. 4, pp. 745–777, Apr. 2014, doi: 10.1109/TASLP.2014.2304637. | Leland |
+| Voice Identification in Python Using Hidden Markov Model | [link](https://www.researchgate.net/profile/Harika-Kotha/publication/342956180_Voice_Identification_in_Python_Using_Hidden_Markov_Model/links/5f0eff2b92851c1eff11e854/Voice-Identification-in-Python-Using-Hidden-Markov-Model.pdf) | Describes a Python-based voice identification system using Hidden Markov Models, highlighting NLP-driven speech recognition applications. | V. M. N. S. V. K. Gupta, R. Shiva Shankar, H. D. Kotha, and J. Raghaveni, “Voice identification in Python using Hidden Markov Model,” *Int. J. Adv. Sci. Technol.*, vol. 29, no. 6, pp. 8100–8112, 2020. | Leland |
+| VOiCES: Voices Obscured in Complex Environmental Settings (VOiCES Corpus) | [link](https://www.isca-archive.org/interspeech_2018/richey18_interspeech.html) | Corpus of 15,904 speech segments from 196 speakers recorded in real rooms with reverberation, multiple microphones, and background noise for far-field ASR and speaker recognition. | C. Richey et al., “Voices Obscured in Complex Environmental Settings (VOiCES) corpus,” in *Proc. Interspeech*, 2018, pp. 1566–1570. | Liam |
+| Extended U-Net for Speaker Verification in Noisy Environments | [link](https://www.isca-archive.org/interspeech_2022/kim22b_interspeech.pdf) | Proposes U-Net and Extended U-Net architectures that jointly perform enhancement and speaker embedding extraction, achieving state-of-the-art results on VoxCeleb1 mixed with MUSAN and VOiCES. | J.-h. Kim, J. Heo, H.-j. Shim, and H.-J. Yu, “Extended U-Net for speaker verification in noisy environments,” in *Proc. Interspeech*, 2022, pp. 590–594. | Liam |
+| VoiceLive: A Phoneme Localization based Liveness Detection for Voice Authentication on Smartphones | [link](https://dl.acm.org/doi/abs/10.1145/2976749.2978296) | Uses smartphone stereo microphones for liveness-aware voice authentication resistant to replay attacks. | L. Zhang, S. Tan, J. Yang, and Y. Chen, “VoiceLive: A phoneme localization based liveness detection for voice authentication on smartphones,” in *Proc. 2016 ACM SIGSAC Conf. on Computer and Communications Security (CCS)*, Vienna, Austria, 2016, pp. 1080–1091, doi: 10.1145/2976749.2978296. | Lilly |
