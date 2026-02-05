@@ -15,21 +15,17 @@
 - **M1 — Design/Requirements Spec** — Target: **Feb 5, 2026**  
   Deliverable: PDF + sources (Overleaf or paper/).  
   Acceptance: describe project overview (abstract), tools/datasets (provisional ok), timeline w/ objectives (Gantt Chart) + roles, related work (has someone done something similar and what can we learn from them), 15–20 refs (datasets, tools etc.), 2-4 pages long in ISMIR template.
-  
-**Liam**:
-- Describe Tools and Datasets
-- 6 References (mix of tools, datasets, and literature)
-- Related Work Section
 
-**Leland**
-- Timeline (Gantt Chart)
-- 6 References (mix of tools, datasets, and literature)
-- Creating Github Project Structure (Milestones, Issues, and assigned roles)
 
-**Lilly**
- - Describe proposed project
- - 6 References (mix of tools, datasets, and literature)
- - Latex Compile/Fromatting + Hand In on FEB 6th!!!
+## M1: Project Design Specifications
+- Describe Tools and Datasets - liam
+- 6 References (mix of tools, datasets, and literature) -liam
+- Related Work Section - liam
+- Timeline (Gantt Chart) -leland
+- 6 References (mix of tools, datasets, and literature) -leland
+- Creating Github Project Structure (Milestones, Issues, and assigned roles) -leland
+ - Describe proposed project -lilly
+ - 6 References (mix of tools, datasets, and literature) -lily
  
  
 
