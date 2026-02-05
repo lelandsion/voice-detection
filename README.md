@@ -15,7 +15,7 @@ Voice-based authentication has emerged as a convenient and secure method for dev
 []
 
 ## Objectives, Timeline, Roles
-Found at PROJECT-STRUCTURE.md
+Found at [PROJECT-STRUCTURE.md](https://github.com/lelandsion/voice-detection/blob/main/PROJECT_STRUCTURE.md)
 
 ## Research and References
 | Title | URL | Summary | Citation (IEEE) | Sourced by |
