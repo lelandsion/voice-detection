@@ -25,7 +25,7 @@
 - Split data into training and test sets – Leland
 - Preprocess data to begin with a start frequency – Leland
 - Develop underlying logic to record sound (mic input) – Liam
-- Process input sound using DFT or FFT – Liam
+- Process input sound using DFT or FFT – Lily
 - Normalize output from processed input – Lily
 - Develop logic to pass normalized input to model for binary classification – Lily
 - Create end-to-end data extraction pipeline script – Leland
@@ -33,11 +33,11 @@
 ## M3: Insight Extraction
 - Define evaluation metrics (FAR, FRR, EER, ROC) – Leland
 - Perform exploratory data analysis on audio/features – Liam
-- Analyze feature/embedding separability (same vs different speaker) – Lily
+- Analyze feature/embedding separability (same vs different speaker) – Liam
 - Evaluate performance across noise conditions – Leland
 
 ## M4: Model Training
-- Select baseline verification model architecture – Lily
+- Select baseline verification model architecture – Liam
 - Implement training loop for binary speaker verification – Lily
 - Train baseline model on clean data – Leland
 - Save trained model checkpoints and configs – Leland
@@ -56,8 +56,8 @@
 - Test live demo on Windows laptop microphone – Leland
 
 ## M7: Report and Final Deliverables
-- Write methods and system description section – Lily
+- Write methods and system description section – Leland
 - Write experiments and results section – Leland
-- Write discussion and limitations section – Liam
-- Compile ISMIR-style report with 15–20 references – Leland
+- Write discussion and limitations section – Lily
+- Compile ISMIR-style report with 15–20 references – Lily
 - Final reproducibility check (scripts + configs) – Liam
