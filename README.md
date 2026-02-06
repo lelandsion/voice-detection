@@ -17,12 +17,23 @@ Voice-based authentication has emerged as a convenient and secure method for dev
 ## Objectives, Timeline, Roles
 Found at [PROJECT-STRUCTURE.md](https://github.com/lelandsion/voice-detection/blob/main/PROJECT_STRUCTURE.md)
 
+## Example George Tzanetakis
+
+     Objective (implement a functional genre classification system for the Music4All dataset) - 2-3 objectives per person
+        PI1 (basic): load and process the Music4All dataset including audio 
+        PI2 (basic): train a Naive Bayes classifier for genre prediction 
+        PI3 (expected): compare different classifiers in terms of classification accuracy, show corresponding confusion matrices 
+        PI4 (expected): calculated timing stats for training and prediction for each classifier, run different subsets of the dataset to get a better sense of scaling 
+        PI5 (advanced) - implement data augmentation by pitch shifting/time stretching and see how it affects training and prediction 
+
+
 ## Research and References
 | Title | URL | Summary | Citation (IEEE) | Sourced by |
 |------|-----|---------|----------------|-----------|
 | Voice recognition based on adaptive MFCC and deep learning | [link](https://ieeexplore.ieee.org/abstract/document/7603830) | Proposes an enhanced voice recognition method using Adaptive MFCC and deep learning, addressing noise-removal issues that degrade audio quality in existing algorithms. | H.-S. Bae, H.-J. Lee, and S.-G. Lee, “Voice recognition based on adaptive MFCC and deep learning,” in *Proc. 2016 IEEE 11th Conf. on Industrial Electronics and Applications (ICIEA)*, Hefei, China, Jun. 2016, pp. 1542–1546, doi: 10.1109/ICIEA.2016.7603830. | Leland |
-| Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint | [link](https://ieeexplore.ieee.org/abstract/document/10709042) | Explores smartphone voiceprint unlocking using MFCC-based voice texture recognition, comparing it to fingerprint unlocking and emphasizing personalization and convenience. | L. Zhang et al., "Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint," in Proceedings of the 2024 IEEE 2nd International Conference on Image Processing and Computer Applications (ICIPCA), Shenyang, China, 2024, pp. 763-769, doi: 10.1109/ICIPCA61593.2024.10709042. | Leland |
-| Voice Activity Detection (VAD) in Noisy Environments | [link](https://arxiv.org/abs/2312.05815)<br>[link](https://arxiv.org/pdf/2312.05815) | Focuses on isolating speech from diverse background noise using a Voice Activity Detection (VAD) system. | J. Ball, “Voice Activity Detection (VAD) in Noisy Environments,” *arXiv*, 2023. https://arxiv.org/abs/2312.05815 | Lilly |
+| Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint | [link](https://ieeexplore.ieee.org/abstract/document/10709042) | Explores smartphone voiceprint unlocking using MFCC-based voice texture recognition, comparing it to fingerprint unlocking and emphasizing personalization and convenience. | L. Zhang et al., "Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint," in Proceedings of the 2024 I
+EEE 2nd International Conference on Image Processing and Computer Applications (ICIPCA), Shenyang, China, 2024, pp. 763-769, doi: 10.1109/ICIPCA61593.2024.10709042. | Leland |
+| Voice Activity Detection (VAD) in Noisy Environments | [link](https://arxiv.org/abs/2312.05815)<br>[read](https://arxiv.org/pdf/2312.05815) | Focuses on isolating speech from diverse background noise using a Voice Activity Detection (VAD) system. | J. Ball, “Voice Activity Detection (VAD) in Noisy Environments,” *arXiv*, 2023. https://arxiv.org/abs/2312.05815 | Lilly |
 | Quality measures for speaker verification with short utterances | [link](https://www.sciencedirect.com/science/article/abs/pii/S1051200418304287) | Addresses reliable speaker verification using short utterances by combining match and quality scores derived from zero-order Baum–Welch statistics using GMM-UBM. | S. Das, J. Yang, and J. H. L. Hansen, “Quality measures for speaker verification with short utterances,” *Digital Signal Processing*, vol. 88, pp. 66–79, May 2019, doi: https://doi.org/10.1016/j.dsp.2019.01.023. | Lilly |
 | Speaker Recognition in Noisy Environments | [link](https://mirkomarras.github.io/dl-voice-noise/) | Describes a deep-learning–based speaker recognition system evaluated under multiple noise types and SNR levels in realistic smart-environment conditions. | M. Marras, “Speaker recognition in noisy environments,” project page, 2019. | Liam |
 | Active Voice Authentication | [link](https://www.sciencedirect.com/science/article/abs/pii/S1051200420300178?via%3Dihub) | Explores continuous speaker verification that monitors and validates a user’s voice in real time using very short voice samples. | Z. Meng, M. U. B. Altaf, and B.-H. (Fred) Juang, “Active voice authentication,” *Digital Signal Processing*, vol. 101, p. 102672, Jun. 2020, doi: https://doi.org/10.1016/j.dsp.2020.102672. | Lilly |
@@ -39,34 +50,34 @@ Found at [PROJECT-STRUCTURE.md](https://github.com/lelandsion/voice-detection/bl
 
 ## Bibliography
 
-[1] H.-S. Bae, H.-J. Lee, and S.-G. Lee, “Voice recognition based on adaptive MFCC and deep learning,” in Proceedings of the 2016 IEEE 11th Conference on Industrial Electronics and Applications (ICIEA), Hefei, China, Jun. 2016, pp. 1542–1546, doi: 10.1109/ICIEA.2016.7603830.
+1. H.-S. Bae, H.-J. Lee, and S.-G. Lee, “Voice recognition based on adaptive MFCC and deep learning,” in Proceedings of the 2016 IEEE 11th Conference on Industrial Electronics and Applications (ICIEA), Hefei, China, Jun. 2016, pp. 1542–1546, doi: 10.1109/ICIEA.2016.7603830.
 
-[2] J. Ball, “Voice Activity Detection (VAD) in Noisy Environments,” arXiv, 2023. [Online]. Available: https://arxiv.org/abs/2312.05815
+2. J. Ball, “Voice Activity Detection (VAD) in Noisy Environments,” arXiv, 2023. [Online]. Available: https://arxiv.org/abs/2312.05815
 
-[3] S. Das, J. Yang, and J. H. L. Hansen, “Quality measures for speaker verification with short utterances,” Digital Signal Processing, vol. 88, pp. 66–79, May 2019, doi: 10.1016/j.dsp.2019.01.023.
+3.  S. Das, J. Yang, and J. H. L. Hansen, “Quality measures for speaker verification with short utterances,” Digital Signal Processing, vol. 88, pp. 66–79, May 2019, doi: 10.1016/j.dsp.2019.01.023.
 
-[4] M. Marras, “Speaker recognition in noisy environments,” project page, 2019. [Online]. Available: https://mirkomarras.github.io/dl-voice-noise/
+4. M. Marras, “Speaker recognition in noisy environments,” project page, 2019. [Online]. Available: https://mirkomarras.github.io/dl-voice-noise/
 
-[5] Z. Meng, M. U. B. Altaf, and B.-H. Juang, “Active voice authentication,” Digital Signal Processing, vol. 101, p. 102672, Jun. 2020, doi: 10.1016/j.dsp.2020.102672.
+5. Z. Meng, M. U. B. Altaf, and B.-H. Juang, “Active voice authentication,” Digital Signal Processing, vol. 101, p. 102672, Jun. 2020, doi: 10.1016/j.dsp.2020.102672.
 
-[6] Mozilla Foundation, “Mozilla Common Voice: An Open Multilingual Speech Corpus for Machine Learning,” 2020. [Online]. Available: https://commonvoice.mozilla.org. Accessed: Feb. 3, 2026.
+6. Mozilla Foundation, “Mozilla Common Voice: An Open Multilingual Speech Corpus for Machine Learning,” 2020. [Online]. Available: https://commonvoice.mozilla.org. Accessed: Feb. 3, 2026.
 
-[7] M. A. Alghamdi et al., “AudioUnlock: Device-to-device authentication via acoustic fingerprints,” Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies, vol. 9, no. 3, Oct. 2025.
+7. M. A. Alghamdi et al., “AudioUnlock: Device-to-device authentication via acoustic fingerprints,” Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies, vol. 9, no. 3, Oct. 2025.
 
-[8] D. Snyder, G. Chen, and D. Povey, “MUSAN: A music, speech, and noise corpus,” arXiv preprint arXiv:1510.08484, 2015.
+8. D. Snyder, G. Chen, and D. Povey, “MUSAN: A music, speech, and noise corpus,” arXiv preprint arXiv:1510.08484, 2015.
 
-[9] S. Sun, B. Zhang, L. Xie, and Y. Zhang, “An unsupervised deep domain adaptation approach for robust speech recognition,” Neurocomputing, vol. 257, pp. 79–87, Sept. 2017, doi: 10.1016/j.neucom.2016.12.063.
+9. S. Sun, B. Zhang, L. Xie, and Y. Zhang, “An unsupervised deep domain adaptation approach for robust speech recognition,” Neurocomputing, vol. 257, pp. 79–87, Sept. 2017, doi: 10.1016/j.neucom.2016.12.063.
 
-[10] B. H. Juang and S. Furui, “Automatic recognition and understanding of spoken language – a first step toward natural human-machine communication,” Proceedings of the IEEE, vol. 88, no. 8, pp. 1142–1165, Aug. 2000, doi: 10.1109/5.880077.
+10. B. H. Juang and S. Furui, “Automatic recognition and understanding of spoken language – a first step toward natural human-machine communication,” Proceedings of the IEEE, vol. 88, no. 8, pp. 1142–1165, Aug. 2000, doi: 10.1109/5.880077.
 
-[11] J. Li, L. Deng, Y. Gong, and R. Haeb-Umbach, “An overview of noise-robust automatic speech recognition,” IEEE/ACM Transactions on Audio, Speech, and Language Processing, vol. 22, no. 4, pp. 745–777, Apr. 2014, doi: 10.1109/TASLP.2014.2304637.
+11. J. Li, L. Deng, Y. Gong, and R. Haeb-Umbach, “An overview of noise-robust automatic speech recognition,” IEEE/ACM Transactions on Audio, Speech, and Language Processing, vol. 22, no. 4, pp. 745–777, Apr. 2014, doi: 10.1109/TASLP.2014.2304637.
 
-[12] V. M. N. S. V. K. Gupta, R. Shiva Shankar, H. D. Kotha, and J. Raghaveni, “Voice identification in Python using Hidden Markov Model,” International Journal of Advanced Science and Technology, vol. 29, no. 6, pp. 8100–8112, 2020.
+12. V. M. N. S. V. K. Gupta, R. Shiva Shankar, H. D. Kotha, and J. Raghaveni, “Voice identification in Python using Hidden Markov Model,” International Journal of Advanced Science and Technology, vol. 29, no. 6, pp. 8100–8112, 2020.
 
-[13] C. Richey et al., “Voices Obscured in Complex Environmental Settings (VOiCES) corpus,” in Proceedings of Interspeech, 2018, pp. 1566–1570.
+13. C. Richey et al., “Voices Obscured in Complex Environmental Settings (VOiCES) corpus,” in Proceedings of Interspeech, 2018, pp. 1566–1570.
 
-[14] J.-H. Kim, J. Heo, H.-J. Shim, and H.-J. Yu, “Extended U-Net for speaker verification in noisy environments,” in Proceedings of Interspeech, 2022, pp. 590–594.
+14. J.-H. Kim, J. Heo, H.-J. Shim, and H.-J. Yu, “Extended U-Net for speaker verification in noisy environments,” in Proceedings of Interspeech, 2022, pp. 590–594.
 
-[15] L. Zhang, S. Tan, J. Yang, and Y. Chen, “VoiceLive: A phoneme localization based liveness detection for voice authentication on smartphones,” in Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security (CCS), Vienna, Austria, 2016, pp. 1080–1091, doi: 10.1145/2976749.2978296.
+15. L. Zhang, S. Tan, J. Yang, and Y. Chen, “VoiceLive: A phoneme localization based liveness detection for voice authentication on smartphones,” in Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security (CCS), Vienna, Austria, 2016, pp. 1080–1091, doi: 10.1145/2976749.2978296.
 
-[16] L. Zhang et al., "Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint," in Proceedings of the 2024 IEEE 2nd International Conference on Image Processing and Computer Applications (ICIPCA), Shenyang, China, 2024, pp. 763-769, doi: 10.1109/ICIPCA61593.2024.10709042.
+16. L. Zhang et al., "Voiceprint Unlocking Based on MFCC—Exploration of Voiceprint Models Different from Fingerprint," in Proceedings of the 2024 IEEE 2nd International Conference on Image Processing and Computer Applications (ICIPCA), Shenyang, China, 2024, pp. 763-769, doi: 10.1109/ICIPCA61593.2024.10709042.
