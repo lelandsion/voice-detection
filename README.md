@@ -47,6 +47,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ### Objective 2: Implement the data pipeline for preprocessing audio from raw to model-usable
 **Owner:** Leland
+
 **PI1 (Basic):** Load raw audio files and convert them into a consistent format for analysis.
 **PI2 (Basic):** Extract relevant audio features (e.g., MFCCs, spectrograms) for model input.
 **PI3 (Expected):** Validate the feature extraction process by visualizing sample spectrograms and checking consistency across files.
@@ -56,6 +57,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ### Objective 3: Implement a conversion from raw mic input into usable raw audio, and create logic/interface for recording audio
 **Owner:** Liam
+
 **PI1 (Basic):** Capture audio from the microphone and save it in a standard format.
 **PI2 (Basic):** Implement a simple user interface for starting and stopping recordings.
 **PI3 (Expected):** Add real-time monitoring of audio levels and feedback for recording quality.
@@ -65,6 +67,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ### Objective 4: Add noise robustness to the model and evaluate performance to a desired level
 **Owner:** Liam
+
 **PI1 (Basic):** Introduce controlled noise to audio samples to simulate real-world conditions.
 **PI2 (Basic):** Add basic noise isolation to the existing model.
 **PI3 (Expected):** Train the model using noisy inputs to improve robustness.
@@ -74,6 +77,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ### Objective 5: Implement a verification pipeline with random prompts
 **Owner:** Liam
+
 **PI1 (Basic):** Generate random test prompts and assign them to the model for evaluation.
 **PI2 (Basic):** Capture and log the model’s predictions for verification.
 **PI3 (Expected):** Analyze consistency of model outputs across repeated prompts.
@@ -83,6 +87,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ### Objective 6: Perform normalization on raw sound data to be preprocessed and sent to the model
 **Owner:** Lilly
+
 **PI1 (Basic):** Standardize audio amplitude and sample rate for all input files.
 **PI2 (Basic):** Apply dynamic range compression or scaling to reduce variation across recordings.
 **PI3 (Expected):** Validate normalization by comparing feature distributions before and after processing.
