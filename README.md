@@ -23,15 +23,6 @@ Noise robust speech and speaker recognition remains a central challenge in parti
 
 In parallel, alternative authentication paradigms such as acoustic fingerprinting have recently explored device-to-device verification using speakers and microphones as physical identifiers, highlighting the broader applicability of audio-based security mechanisms beyond speaker identity alone [11]. Building on this body of work, our work focuses on text-dependent voice authentication with random prompts, targeting robust performance at extremely low SNRs while maintaining low imposter acceptance rates. Through the integration of established feature extraction techniques, noise-aware preprocessing, and realistic dataset augmentation, this work aligns with and extends prior research towards practical deployment of voice unlock systems.
 
-## Timeline
-
-<p>Gantt Chart Phase 1:</p>
-<img src="gantt-chart-p1.png" width="1200">
-
-<p>Gantt Chart Phase 2:</p>
-<img src="gantt-chart-p2.png" width="1200">
-
-
 ## Objectives, Timeline, Roles
 
 
