@@ -25,7 +25,11 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ## Timeline
 
+<p>Gantt Chart Phase 1:</p>
+<img src="images/gantt-chart-p1.png" width="600">
 
+<p>Gantt Chart Phase 2:</p>
+<img src="images/gantt-chart-p2.png" width="600">
 
 
 ## Objectives, Timeline, Roles
