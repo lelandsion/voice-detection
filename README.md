@@ -23,18 +23,67 @@ Noise robust speech and speaker recognition remains a central challenge in parti
 
 In parallel, alternative authentication paradigms such as acoustic fingerprinting have recently explored device-to-device verification using speakers and microphones as physical identifiers, highlighting the broader applicability of audio-based security mechanisms beyond speaker identity alone [11]. Building on this body of work, our work focuses on text-dependent voice authentication with random prompts, targeting robust performance at extremely low SNRs while maintaining low imposter acceptance rates. Through the integration of established feature extraction techniques, noise-aware preprocessing, and realistic dataset augmentation, this work aligns with and extends prior research towards practical deployment of voice unlock systems.
 
+## Timeline
+
+
+
 
 ## Objectives, Timeline, Roles
-Found at [PROJECT-STRUCTURE.md](https://github.com/lelandsion/voice-detection/blob/main/PROJECT_STRUCTURE.md)
 
-## Example George Tzanetakis
+Objective (Train and test model for binary classification of singers based on audio)
+Leland
+PI1 (basic): load and process the datasets including audio 
+PI2 (basic): train a MFCC model for binary classifiaciton of singers based on audio
+PI3 (expected): compare different classifiers in terms of classification accuracy, show corresponding confusion matrices and associated accuracy data
+PI4 (expected): Implement the model with a desired accuracy of 80-90 % 
+PI5 (advanced) - Apply data augmentation techniques such as pitch shifting and time stretching to the singing recordings, and evaluate how these augmentations impact the training performance and classification accuracy of the singer recognition model.
 
-     Objective (implement a functional genre classification system for the Music4All dataset) - 2-3 objectives per person
-        PI1 (basic): load and process the Music4All dataset including audio 
-        PI2 (basic): train a Naive Bayes classifier for genre prediction 
-        PI3 (expected): compare different classifiers in terms of classification accuracy, show corresponding confusion matrices 
-        PI4 (expected): calculated timing stats for training and prediction for each classifier, run different subsets of the dataset to get a better sense of scaling 
-        PI5 (advanced) - implement data augmentation by pitch shifting/time stretching and see how it affects training and prediction 
+Objective (Implement the data pipeline for preprosessing audio from raw to model usable)
+Leland
+PI1 (basic): Load raw audio files and convert them into a consistent format for analysis.
+PI2 (basic): Extract relevant audio features (e.g., MFCCs, spectrograms) for model input.
+PI3 (expected): Validate the feature extraction process by visualizing sample spectrograms and checking consistency across files.
+PI4 (expected): Measure processing time for different batch sizes to assess pipeline efficiency.
+PI5 (advanced): Integrate automated error handling and logging for corrupted or missing audio files to improve robustness.
+Objective (Implement a conversion from raw mic input into usable raw audio, create logic and interface for recording audio) 
+Liam
+PI1 (basic): Capture audio from the microphone and save it in a standard format.
+PI2 (basic): Implement a simple user interface for starting/stopping recordings.
+PI3 (expected): Add real-time monitoring of audio levels and feedback for recording quality.
+PI4 (expected): Implement functionality to store recordings with metadata (timestamp, duration).
+PI5 (advanced): Develop automated preprocessing of recorded audio, including noise reduction and normalization, before sending it to the model.
+
+Objective (Add noise robusteness to model and evaluate performance to a desired level) 
+Liam
+PI1 (basic): Introduce controlled noise to audio samples to simulate real-world conditions.
+PI2 (basic): Add basic noise isolation to existing model.
+PI3 (expected): Train mode using noisy inputs to create robustness.
+PI4 (expected): Implement preprocessing strategies (e.g., filtering, denoising) to mitigate performance loss.
+PI5 (advanced): Apply data augmentation with noise injection and evaluate improvements in model robustness.
+
+Objective (implement a verification pipeline with arndom prompts) 
+Liam
+PI1 (basic): Generate random test prompts and assign them to the model for evaluation.
+PI2 (basic): Capture and log the model’s predictions for verification.
+PI3 (expected): Analyze consistency of model outputs across repeated prompts.
+PI4 (expected): Identify cases where the model fails and categorize errors by type.
+PI5 (advanced): Implement automated feedback to retrain or fine-tune the model based on verification results.
+
+Objective (Perform normalization on raw sound data to be preprocessed and sent to a model from dataset)
+Lilly
+PI1 (basic): Standardize audio amplitude and sample rate for all input files.
+PI2 (basic): Apply dynamic range compression or scaling to reduce variation across recordings.
+PI3 (expected): Validate normalization by comparing feature distributions before and after processing.
+PI4 (expected): Evaluate impact of normalization on model input consistency and training stability.
+PI5 (advanced): Automate the normalization process as part of a full preprocessing pipeline for incoming audio streams.
+
+Objective (Compile report and decide and complete formating for reports) 
+Lilly
+PI1 (basic): Collect results, figures, and tables from experiments and organize them logically.
+PI2 (basic): Draft the initial report with clear sections for methodology, results, and discussion.
+PI3 (expected): Review report formatting and consistency, including figure captions and references.
+PI4 (expected): Include evaluation metrics, charts, and tables to support conclusions.
+PI5 (advanced): Implement automated scripts to update the report as new results are generated, ensuring reproducibility.
 
 
 ## Research and References
