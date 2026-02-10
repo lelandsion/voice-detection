@@ -34,61 +34,71 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ## Objectives, Timeline, Roles
 
-Objective (Train and test model for binary classification of singers based on audio)
-Leland
-PI1 (basic): load and process the datasets including audio 
-PI2 (basic): train a MFCC model for binary classifiaciton of singers based on audio
-PI3 (expected): compare different classifiers in terms of classification accuracy, show corresponding confusion matrices and associated accuracy data
-PI4 (expected): Implement the model with a desired accuracy of 80-90 % 
-PI5 (advanced) - Apply data augmentation techniques such as pitch shifting and time stretching to the singing recordings, and evaluate how these augmentations impact the training performance and classification accuracy of the singer recognition model.
+# Project Objectives and Planned Items (PIs)
 
-Objective (Implement the data pipeline for preprosessing audio from raw to model usable)
-Leland
-PI1 (basic): Load raw audio files and convert them into a consistent format for analysis.
-PI2 (basic): Extract relevant audio features (e.g., MFCCs, spectrograms) for model input.
-PI3 (expected): Validate the feature extraction process by visualizing sample spectrograms and checking consistency across files.
-PI4 (expected): Measure processing time for different batch sizes to assess pipeline efficiency.
-PI5 (advanced): Integrate automated error handling and logging for corrupted or missing audio files to improve robustness.
-Objective (Implement a conversion from raw mic input into usable raw audio, create logic and interface for recording audio) 
-Liam
-PI1 (basic): Capture audio from the microphone and save it in a standard format.
-PI2 (basic): Implement a simple user interface for starting/stopping recordings.
-PI3 (expected): Add real-time monitoring of audio levels and feedback for recording quality.
-PI4 (expected): Implement functionality to store recordings with metadata (timestamp, duration).
-PI5 (advanced): Develop automated preprocessing of recorded audio, including noise reduction and normalization, before sending it to the model.
+## Objective 1: Train and test model for binary classification of singers based on audio
+**Owner:** Leland
 
-Objective (Add noise robusteness to model and evaluate performance to a desired level) 
-Liam
-PI1 (basic): Introduce controlled noise to audio samples to simulate real-world conditions.
-PI2 (basic): Add basic noise isolation to existing model.
-PI3 (expected): Train mode using noisy inputs to create robustness.
-PI4 (expected): Implement preprocessing strategies (e.g., filtering, denoising) to mitigate performance loss.
-PI5 (advanced): Apply data augmentation with noise injection and evaluate improvements in model robustness.
+**PI1 (Basic):** Load and process the datasets including audio.
+**PI2 (Basic):** Train an MFCC-based model for binary classification of singers.
+**PI3 (Expected):** Compare different classifiers in terms of classification accuracy, showing confusion matrices and associated accuracy data.
+**PI4 (Expected):** Implement the model to achieve a desired accuracy of 80–90%.
+**PI5 (Advanced):** Apply data augmentation techniques such as pitch shifting and time stretching, and evaluate how these augmentations impact training performance and classification accuracy.
 
-Objective (implement a verification pipeline with arndom prompts) 
-Liam
-PI1 (basic): Generate random test prompts and assign them to the model for evaluation.
-PI2 (basic): Capture and log the model’s predictions for verification.
-PI3 (expected): Analyze consistency of model outputs across repeated prompts.
-PI4 (expected): Identify cases where the model fails and categorize errors by type.
-PI5 (advanced): Implement automated feedback to retrain or fine-tune the model based on verification results.
 
-Objective (Perform normalization on raw sound data to be preprocessed and sent to a model from dataset)
-Lilly
-PI1 (basic): Standardize audio amplitude and sample rate for all input files.
-PI2 (basic): Apply dynamic range compression or scaling to reduce variation across recordings.
-PI3 (expected): Validate normalization by comparing feature distributions before and after processing.
-PI4 (expected): Evaluate impact of normalization on model input consistency and training stability.
-PI5 (advanced): Automate the normalization process as part of a full preprocessing pipeline for incoming audio streams.
+## Objective 2: Implement the data pipeline for preprocessing audio from raw to model-usable
+**Owner:** Leland
+**PI1 (Basic):** Load raw audio files and convert them into a consistent format for analysis.
+**PI2 (Basic):** Extract relevant audio features (e.g., MFCCs, spectrograms) for model input.
+**PI3 (Expected):** Validate the feature extraction process by visualizing sample spectrograms and checking consistency across files.
+**PI4 (Expected):** Measure processing time for different batch sizes to assess pipeline efficiency.
+**PI5 (Advanced):** Integrate automated error handling and logging for corrupted or missing audio files to improve robustness.
 
-Objective (Compile report and decide and complete formating for reports) 
-Lilly
-PI1 (basic): Collect results, figures, and tables from experiments and organize them logically.
-PI2 (basic): Draft the initial report with clear sections for methodology, results, and discussion.
-PI3 (expected): Review report formatting and consistency, including figure captions and references.
-PI4 (expected): Include evaluation metrics, charts, and tables to support conclusions.
-PI5 (advanced): Implement automated scripts to update the report as new results are generated, ensuring reproducibility.
 
+## Objective 3: Implement a conversion from raw mic input into usable raw audio, and create logic/interface for recording audio
+**Owner:** Liam
+**PI1 (Basic):** Capture audio from the microphone and save it in a standard format.
+**PI2 (Basic):** Implement a simple user interface for starting and stopping recordings.
+**PI3 (Expected):** Add real-time monitoring of audio levels and feedback for recording quality.
+**PI4 (Expected):** Implement functionality to store recordings with metadata (timestamp, duration).
+**PI5 (Advanced):** Develop automated preprocessing of recorded audio, including noise reduction and normalization, before sending it to the model.
+
+
+## Objective 4: Add noise robustness to the model and evaluate performance to a desired level
+**Owner:** Liam
+**PI1 (Basic):** Introduce controlled noise to audio samples to simulate real-world conditions.
+**PI2 (Basic):** Add basic noise isolation to the existing model.
+**PI3 (Expected):** Train the model using noisy inputs to improve robustness.
+**PI4 (Expected):** Implement preprocessing strategies (e.g., filtering, denoising) to mitigate performance loss.
+**PI5 (Advanced):** Apply data augmentation with noise injection and evaluate improvements in model robustness.
+
+
+## Objective 5: Implement a verification pipeline with random prompts
+**Owner:** Liam
+**PI1 (Basic):** Generate random test prompts and assign them to the model for evaluation.
+**PI2 (Basic):** Capture and log the model’s predictions for verification.
+**PI3 (Expected):** Analyze consistency of model outputs across repeated prompts.
+**PI4 (Expected):** Identify cases where the model fails and categorize errors by type.
+**PI5 (Advanced):** Implement automated feedback to retrain or fine-tune the model based on verification results.
+
+
+## Objective 6: Perform normalization on raw sound data to be preprocessed and sent to the model
+**Owner:** Lilly
+**PI1 (Basic):** Standardize audio amplitude and sample rate for all input files.
+**PI2 (Basic):** Apply dynamic range compression or scaling to reduce variation across recordings.
+**PI3 (Expected):** Validate normalization by comparing feature distributions before and after processing.
+**PI4 (Expected):** Evaluate the impact of normalization on model input consistency and training stability.
+**PI5 (Advanced):** Automate the normalization process as part of a full preprocessing pipeline for incoming audio streams.
+
+
+## Objective 7: Compile report and complete formatting for reports
+**Owner:** Lilly
+
+**PI1 (Basic):** Collect results, figures, and tables from experiments and organize them logically.
+**PI2 (Basic):** Draft the initial report with clear sections for methodology, results, and discussion.
+**PI3 (Expected):** Review report formatting and consistency, including figure captions and references.
+**PI4 (Expected):** Include evaluation metrics, charts, and tables to support conclusions.
+**PI5 (Advanced):** Implement automated scripts to update the report as new results are generated, ensuring reproducibility.
 
 ## Research and References
 | Title | URL | Summary | Citation (IEEE) | Sourced by |
