@@ -36,7 +36,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Train and test model for binary classification of singers based on audio
-**Owner:** Leland
+Leland
 
 - **PI1 (Basic):** Load and process the datasets including audio.
 - **PI2 (Basic):** Train an MFCC-based model for binary classification of singers.
@@ -46,7 +46,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Implement the data pipeline for preprocessing audio from raw to model-usable
-**Owner:** Leland
+Leland
 
 - **PI1 (Basic):** Load raw audio files and convert them into a consistent format for analysis.
 - **PI2 (Basic):** Extract relevant audio features (e.g., MFCCs, spectrograms) for model input.
@@ -56,7 +56,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Implement a conversion from raw mic input into usable raw audio, and create logic/interface for recording audio
-**Owner:** Liam
+Liam
 
 - **PI1 (Basic):** Capture audio from the microphone and save it in a standard format.
 - **PI2 (Basic):** Implement a simple user interface for starting and stopping recordings.
@@ -66,7 +66,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Add noise robustness to the model and evaluate performance to a desired level
-**Owner:** Liam
+Liam
 
 - **PI1 (Basic):** Introduce controlled noise to audio samples to simulate real-world conditions.
 - **PI2 (Basic):** Add basic noise isolation to the existing model.
@@ -76,7 +76,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Implement a verification pipeline with random prompts
-**Owner:** Liam
+Liam
 
 - **PI1 (Basic):** Generate random test prompts and assign them to the model for evaluation.
 - **PI2 (Basic):** Capture and log the model’s predictions for verification.
@@ -86,7 +86,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Perform normalization on raw sound data to be preprocessed and sent to the model
-**Owner:** Lilly
+Lilly
 
 - **PI1 (Basic):** Standardize audio amplitude and sample rate for all input files.
 - **PI2 (Basic):** Apply dynamic range compression or scaling to reduce variation across recordings.
@@ -96,7 +96,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 
 ### Compile report and complete formatting for reports
-**Owner:** Lilly
+Lilly
 
 - **PI1 (Basic):** Collect results, figures, and tables from experiments and organize them logically.
 - **PI2 (Basic):** Draft the initial report with clear sections for methodology, results, and discussion.
