@@ -34,9 +34,8 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 
 ## Objectives, Timeline, Roles
 
-# Project Objectives and Planned Items (PIs)
 
-## Objective 1: Train and test model for binary classification of singers based on audio
+# Objective 1: Train and test model for binary classification of singers based on audio
 **Owner:** Leland
 
 **PI1 (Basic):** Load and process the datasets including audio.
@@ -46,7 +45,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI5 (Advanced):** Apply data augmentation techniques such as pitch shifting and time stretching, and evaluate how these augmentations impact training performance and classification accuracy.
 
 
-## Objective 2: Implement the data pipeline for preprocessing audio from raw to model-usable
+# Objective 2: Implement the data pipeline for preprocessing audio from raw to model-usable
 **Owner:** Leland
 **PI1 (Basic):** Load raw audio files and convert them into a consistent format for analysis.
 **PI2 (Basic):** Extract relevant audio features (e.g., MFCCs, spectrograms) for model input.
@@ -55,7 +54,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI5 (Advanced):** Integrate automated error handling and logging for corrupted or missing audio files to improve robustness.
 
 
-## Objective 3: Implement a conversion from raw mic input into usable raw audio, and create logic/interface for recording audio
+# Objective 3: Implement a conversion from raw mic input into usable raw audio, and create logic/interface for recording audio
 **Owner:** Liam
 **PI1 (Basic):** Capture audio from the microphone and save it in a standard format.
 **PI2 (Basic):** Implement a simple user interface for starting and stopping recordings.
@@ -64,7 +63,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI5 (Advanced):** Develop automated preprocessing of recorded audio, including noise reduction and normalization, before sending it to the model.
 
 
-## Objective 4: Add noise robustness to the model and evaluate performance to a desired level
+# Objective 4: Add noise robustness to the model and evaluate performance to a desired level
 **Owner:** Liam
 **PI1 (Basic):** Introduce controlled noise to audio samples to simulate real-world conditions.
 **PI2 (Basic):** Add basic noise isolation to the existing model.
@@ -73,7 +72,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI5 (Advanced):** Apply data augmentation with noise injection and evaluate improvements in model robustness.
 
 
-## Objective 5: Implement a verification pipeline with random prompts
+# Objective 5: Implement a verification pipeline with random prompts
 **Owner:** Liam
 **PI1 (Basic):** Generate random test prompts and assign them to the model for evaluation.
 **PI2 (Basic):** Capture and log the model’s predictions for verification.
@@ -82,7 +81,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI5 (Advanced):** Implement automated feedback to retrain or fine-tune the model based on verification results.
 
 
-## Objective 6: Perform normalization on raw sound data to be preprocessed and sent to the model
+# Objective 6: Perform normalization on raw sound data to be preprocessed and sent to the model
 **Owner:** Lilly
 **PI1 (Basic):** Standardize audio amplitude and sample rate for all input files.
 **PI2 (Basic):** Apply dynamic range compression or scaling to reduce variation across recordings.
@@ -91,7 +90,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI5 (Advanced):** Automate the normalization process as part of a full preprocessing pipeline for incoming audio streams.
 
 
-## Objective 7: Compile report and complete formatting for reports
+# Objective 7: Compile report and complete formatting for reports
 **Owner:** Lilly
 
 **PI1 (Basic):** Collect results, figures, and tables from experiments and organize them logically.
@@ -100,7 +99,7 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 **PI4 (Expected):** Include evaluation metrics, charts, and tables to support conclusions.
 **PI5 (Advanced):** Implement automated scripts to update the report as new results are generated, ensuring reproducibility.
 
-## Research and References
+# Research and References
 | Title | URL | Summary | Citation (IEEE) | Sourced by |
 |------|-----|---------|----------------|-----------|
 | Voice recognition based on adaptive MFCC and deep learning | [link](https://ieeexplore.ieee.org/abstract/document/7603830) | Proposes an enhanced voice recognition method using Adaptive MFCC and deep learning, addressing noise-removal issues that degrade audio quality in existing algorithms. | H.-S. Bae, H.-J. Lee, and S.-G. Lee, “Voice recognition based on adaptive MFCC and deep learning,” in *Proc. 2016 IEEE 11th Conf. on Industrial Electronics and Applications (ICIEA)*, Hefei, China, Jun. 2016, pp. 1542–1546, doi: 10.1109/ICIEA.2016.7603830. | Leland |
