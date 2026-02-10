@@ -86,7 +86,7 @@ Liam
 
 
 ### Perform normalization on raw sound data to be preprocessed and sent to the model
-**Lilly
+Lilly
 
 - **PI1 (Basic):** Standardize audio amplitude and sample rate for all input files.
 - **PI2 (Basic):** Apply dynamic range compression or scaling to reduce variation across recordings.
@@ -96,7 +96,7 @@ Liam
 
 
 ### Compile report and complete formatting for reports
-**Lilly
+Lilly
 
 - **PI1 (Basic):** Collect results, figures, and tables from experiments and organize them logically.
 - **PI2 (Basic):** Draft the initial report with clear sections for methodology, results, and discussion.
