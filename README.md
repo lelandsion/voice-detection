@@ -95,6 +95,16 @@ In parallel, alternative authentication paradigms such as acoustic fingerprintin
 - **PI4 (Expected):** Include evaluation metrics, charts, and tables to support conclusions.
 - **PI5 (Advanced):** Implement automated scripts to update the report as new results are generated, ensuring reproducibility.
 
+### Feature Extraction, Evaluation, and Baseline Modelling
+### Yilun
+
+- **PI1 (Basic):** Preprocess raw audio files into a consistent model-ready format, including start-frequency extraction, normalization, and summary signal statistics.
+- **PI2 (Basic):** Convert time-domain audio into frequency-domain representations using FFT/DFT and extract spectral descriptors for downstream analysis and modelling.
+- **PI3 (Expected):** Define and implement verification evaluation metrics, including FAR, FRR, EER, ROC, and AUC, and analyze feature separability between same-speaker and different-speaker samples.
+- **PI4 (Expected):** Train and evaluate a clean-data baseline model on extracted speech features, reporting benchmark results on the Mozilla Common Voice dataset.
+- **PI5 (Advanced):** Extend the baseline to noisy-condition experiments and integrate the evaluation pipeline into the full speaker-verification system for model comparison and threshold tuning.
+
+
 # Research and References
 | Title | URL | Summary | Citation (IEEE) | Sourced by |
 |------|-----|---------|----------------|-----------|
