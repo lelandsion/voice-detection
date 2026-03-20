@@ -2,7 +2,7 @@
 Music Information Retrieval (CSC 475)
 
     Originator: Liam Degand (liamdegand@uvic.ca)
-    Collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com)
+    Collaborators: Leland Sion (lelands@uvic.ca), Lilly Ko (lillyxcko@gmail.com), and Yilun Shi (yilunshi@uvic.ca).
 
 
 ## Project Overview (Abstract)
