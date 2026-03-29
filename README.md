@@ -15,6 +15,28 @@ For segmentation and robustness, VAD is applied before feature extraction, and n
 
 Training and evaluation primarily use Mozilla Common Voice as the clean speech source, with MUSAN used for controlled noise mixing across SNR levels and VOiCES referenced for realistic reverberant/far-field robustness testing. This combination supports reproducible benchmarking from clean baselines to progressively harder noisy deployment conditions.
 
+## Reproducible Noisy Training Dataset
+
+Use the preprocessing script below to generate a deterministic noisy dataset that mixes each clean utterance with one music clip and one environmental clip at sampled SNR levels.
+
+```bash
+python src/noisy_dataset.py \
+    --music-noise-dir "data/musan/music" \
+    --env-noise-dir "data/musan/noise" \
+    --num-augmentations 2 \
+    --seed 42
+```
+
+Default outputs:
+
+- `data/processed/noisy/audio_files/` (generated noisy wav files)
+- `data/processed/commonvoice_noisy.csv` (training metadata with noisy paths and noise details)
+- `data/processed/commonvoice_noisy_manifest.json` (full config + generation summary)
+
+To keep results reproducible, keep `--seed`, `--music-snr-db`, `--env-snr-db`, and input datasets fixed.
+
+You can train on the noisy metadata by passing the generated CSV and audio root into existing training loaders (for example, `build_speaker_map` in `src/train.py`).
+
 
 ## Related Work
 Voice authentication research spans text-dependent and continuous verification settings. Classical statistical systems, especially GMM-based approaches, established early speaker modeling baselines and remain useful reference points due to interpretability. Later work improved short-utterance reliability by incorporating quality-aware scoring under duration limits and noise contamination.
