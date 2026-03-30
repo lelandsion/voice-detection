@@ -49,6 +49,9 @@ class TrainConfig:
     segment_frames: int = SEGMENT_FRAMES
     min_utterances: int = 5        # speakers below this are excluded
     random_state: int = 42
+    # early stopping
+    val_fraction: float = 0.1     # fraction of speakers held out for validation
+    patience: int = 8             # epochs without val improvement before stopping
 
 
 # ── MFCC extraction ──────────────────────────────────────────────────────────
@@ -244,6 +247,27 @@ class GE2ELoss(nn.Module):
 @dataclass
 class TrainHistory:
     loss: list[float] = field(default_factory=list)
+    val_loss: list[float] = field(default_factory=list)
+
+
+def _eval_loss(
+    model: LSTMEmbedder,
+    loss_fn: GE2ELoss,
+    speaker_map: dict,
+    config: TrainConfig,
+    device: torch.device,
+    steps: int = 20,
+) -> float:
+    model.eval()
+    dataset = SpeakerDataset(speaker_map, config, steps_per_epoch=steps)
+    total = 0.0
+    with torch.no_grad():
+        for batch in DataLoader(dataset, batch_size=1, num_workers=0):
+            x = batch.squeeze(0).to(device)
+            emb = model(x)
+            total += loss_fn(emb, config.n_speakers, config.n_utterances).item()
+    model.train()
+    return total / steps
 
 
 def train(
@@ -251,6 +275,7 @@ def train(
     config: TrainConfig | None = None,
     steps_per_epoch: int = 100,
     verbose: bool = True,
+    pretrained: LSTMEmbedder | None = None,
 ) -> tuple[LSTMEmbedder, TrainHistory]:
     """
     Train the LSTM speaker encoder with GE2E loss.
@@ -273,7 +298,23 @@ def train(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # split off a held-out set of speakers for validation
+    all_spks = list(speaker_map.keys())
+    random.shuffle(all_spks)
+    n_val = max(cfg.n_speakers, int(len(all_spks) * cfg.val_fraction))
+    val_spks = set(all_spks[:n_val])
+    train_map = {k: v for k, v in speaker_map.items() if k not in val_spks}
+    val_map   = {k: v for k, v in speaker_map.items() if k in val_spks}
+
+    if len(train_map) < cfg.n_speakers:
+        raise ValueError(
+            f"not enough speakers to train (need {cfg.n_speakers}, got {len(train_map)})"
+        )
+
     model = LSTMEmbedder(cfg).to(device)
+    if pretrained is not None:
+        model.load_state_dict(pretrained.state_dict())
+
     loss_fn = GE2ELoss().to(device)
 
     # GE2E paper recommends separate learning rates for model vs loss params
@@ -284,10 +325,13 @@ def train(
         ]
     )
 
-    dataset = SpeakerDataset(speaker_map, cfg, steps_per_epoch=steps_per_epoch)
+    dataset = SpeakerDataset(train_map, cfg, steps_per_epoch=steps_per_epoch)
     loader = DataLoader(dataset, batch_size=1, num_workers=0)
 
     history = TrainHistory()
+    best_val = float("inf")
+    best_state = None
+    no_improve = 0
 
     for epoch in range(1, cfg.n_epochs + 1):
         model.train()
@@ -297,19 +341,14 @@ def train(
             # batch: (1, N*M, T, input_dim) — squeeze the DataLoader batch dim
             x = batch.squeeze(0).to(device)            # (N*M, T, input_dim)
 
-            # forward pass: encode each utterance to an embedding
             embeddings = model(x)                       # (N*M, embedding_dim)
-
-            # loss computation
             loss = loss_fn(embeddings, cfg.n_speakers, cfg.n_utterances)
 
-            # backpropagation
             optimizer.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
             optimizer.step()
 
-            # clamp w > 0 as the paper requires
             with torch.no_grad():
                 loss_fn.w.clamp_(min=1e-6)
 
@@ -318,8 +357,26 @@ def train(
         avg_loss = epoch_loss / steps_per_epoch
         history.loss.append(avg_loss)
 
-        if verbose and (epoch % 10 == 0 or epoch == 1):
-            print(f"epoch {epoch:3d}/{cfg.n_epochs}  loss={avg_loss:.4f}")
+        val_loss = _eval_loss(model, loss_fn, val_map, cfg, device, steps=20)
+        history.val_loss.append(val_loss)
+
+        if verbose and (epoch % 5 == 0 or epoch == 1):
+            print(f"epoch {epoch:3d}/{cfg.n_epochs}  loss={avg_loss:.4f}  val={val_loss:.4f}")
+
+        # early stopping
+        if val_loss < best_val - 1e-4:
+            best_val = val_loss
+            best_state = {k: v.clone() for k, v in model.state_dict().items()}
+            no_improve = 0
+        else:
+            no_improve += 1
+            if no_improve >= cfg.patience:
+                if verbose:
+                    print(f"early stop at epoch {epoch}  best val={best_val:.4f}")
+                break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
 
     return model, history
 
