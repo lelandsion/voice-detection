@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "speakers": {
+    "smoke_alice": {
+      "prompts": {
+        "my_voice_is_my_password": {
+          "prompt": "My voice is my password",
+          "vector_path": "vectors\\smoke_alice__my_voice_is_my_password.npy",
+          "count": 2,
+          "updated_at_utc": "2026-03-30T20:50:50.688811+00:00"
+        }
+      }
+    }
+  }
+}
