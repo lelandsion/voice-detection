@@ -280,10 +280,24 @@ def enroll_voice(args: argparse.Namespace) -> None:
     )
 
 
-def _speaker_vector_for_prompt(db: EnrollmentDB, speaker_id: str, prompt_key: str) -> tuple[np.ndarray, str]:
+def _speaker_vector_for_prompt(
+    db: EnrollmentDB,
+    speaker_id: str,
+    prompt_key: str,
+    reference_mode: str = "auto",
+) -> tuple[np.ndarray, str]:
     prompt_map = db.prompts_for_speaker(speaker_id)
-    if prompt_key in prompt_map:
+    mode = reference_mode.strip().lower()
+    if mode not in {"auto", "prompt", "speaker-average"}:
+        raise ValueError("reference_mode must be one of: auto, prompt, speaker-average")
+
+    if mode in {"auto", "prompt"} and prompt_key in prompt_map:
         return db.load_prompt_vector(speaker_id, prompt_key), "prompt"
+
+    if mode == "prompt":
+        raise ValueError(
+            f"Prompt '{prompt_key}' not enrolled for speaker '{speaker_id}' while using strict prompt mode."
+        )
 
     vectors = [db.load_prompt_vector(speaker_id, key) for key in prompt_map.keys()]
     if not vectors:
@@ -334,7 +348,12 @@ def verify_voice(args: argparse.Namespace) -> None:
 
     scored: list[dict[str, Any]] = []
     for speaker_id in db.speakers():
-        ref_vec, source = _speaker_vector_for_prompt(db, speaker_id, prompt_key)
+        ref_vec, source = _speaker_vector_for_prompt(
+            db,
+            speaker_id,
+            prompt_key,
+            reference_mode=args.reference_mode,
+        )
         score = _cosine_similarity(query_vec, ref_vec)
         scored.append({"speaker_id": speaker_id, "score": score, "reference": source})
 
@@ -363,6 +382,7 @@ def verify_voice(args: argparse.Namespace) -> None:
                 "accepted": accepted,
                 "mode": args.mode,
                 "challenge_prompt": challenge_prompt,
+                "reference_mode": args.reference_mode,
                 "challenge_audio": str(challenge_path),
                 "threshold": float(args.threshold),
                 "claimed_speaker": args.claimed_speaker,
@@ -423,6 +443,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     verify.add_argument("--seconds", type=float, default=3.0)
     verify.add_argument("--sample-rate", type=int, default=16000)
     verify.add_argument("--seed", type=int, default=42)
+    verify.add_argument(
+        "--reference-mode",
+        choices=("auto", "prompt", "speaker-average"),
+        default="auto",
+        help="How enrolled references are selected during scoring.",
+    )
     verify.set_defaults(func=verify_voice)
 
     return parser
