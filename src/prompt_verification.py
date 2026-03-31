@@ -253,6 +253,7 @@ def enroll_voice(args: argparse.Namespace) -> None:
             for take_idx in range(args.takes_per_prompt):
                 prefix = f"enroll_{_slugify(args.speaker_id)}_{_slugify(prompt)}_{take_idx + 1}"
                 print(f"Speak these words: {prompt}")
+                input("Press Enter to start recording...")
                 wav_path = _record_live_utterance(recorder, args.seconds, prefix)
                 prompt_to_paths.setdefault(prompt, []).append(wav_path)
 
@@ -326,6 +327,7 @@ def verify_voice(args: argparse.Namespace) -> None:
     else:
         prefix = f"verify_{_slugify(args.claimed_speaker or 'unknown')}_{prompt_key}"
         print(f"Speak these words: {challenge_prompt}")
+        input("Press Enter to start recording...")
         challenge_path = _record_live_utterance(recorder, args.seconds, prefix)
 
     query_vec = _extract_embedding_from_file(model, cfg, challenge_path, device)

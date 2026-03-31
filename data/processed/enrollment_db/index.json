@@ -1,13 +1,65 @@
 {
   "version": 1,
   "speakers": {
-    "smoke_alice": {
+    "degan": {
       "prompts": {
-        "my_voice_is_my_password": {
-          "prompt": "My voice is my password",
-          "vector_path": "vectors\\smoke_alice__my_voice_is_my_password.npy",
+        "loan_cheque_theism": {
+          "prompt": "loan cheque theism",
+          "vector_path": "vectors\\degan__loan_cheque_theism.npy",
+          "count": 1,
+          "updated_at_utc": "2026-03-31T00:33:37.514627+00:00"
+        },
+        "cabana_interview_blessing": {
+          "prompt": "cabana interview blessing",
+          "vector_path": "vectors\\degan__cabana_interview_blessing.npy",
+          "count": 1,
+          "updated_at_utc": "2026-03-31T00:33:37.534184+00:00"
+        },
+        "handle_assertion_super": {
+          "prompt": "handle assertion super",
+          "vector_path": "vectors\\degan__handle_assertion_super.npy",
+          "count": 1,
+          "updated_at_utc": "2026-03-31T00:33:37.552955+00:00"
+        },
+        "annoy_flight_subsection": {
+          "prompt": "annoy flight subsection",
+          "vector_path": "vectors\\degan__annoy_flight_subsection.npy",
+          "count": 4,
+          "updated_at_utc": "2026-03-31T01:43:08.995765+00:00"
+        },
+        "mythology_thirst_roundabout": {
+          "prompt": "mythology thirst roundabout",
+          "vector_path": "vectors\\degan__mythology_thirst_roundabout.npy",
+          "count": 4,
+          "updated_at_utc": "2026-03-31T01:43:09.021993+00:00"
+        },
+        "scrub_pannier_gel": {
+          "prompt": "scrub pannier gel",
+          "vector_path": "vectors\\degan__scrub_pannier_gel.npy",
+          "count": 4,
+          "updated_at_utc": "2026-03-31T01:43:09.044437+00:00"
+        }
+      }
+    },
+    "degan_v2": {
+      "prompts": {
+        "annoy_flight_subsection": {
+          "prompt": "annoy flight subsection",
+          "vector_path": "vectors\\degan_v2__annoy_flight_subsection.npy",
           "count": 2,
-          "updated_at_utc": "2026-03-30T20:50:50.688811+00:00"
+          "updated_at_utc": "2026-03-31T04:13:41.053943+00:00"
+        },
+        "mythology_thirst_roundabout": {
+          "prompt": "mythology thirst roundabout",
+          "vector_path": "vectors\\degan_v2__mythology_thirst_roundabout.npy",
+          "count": 2,
+          "updated_at_utc": "2026-03-31T04:13:41.076193+00:00"
+        },
+        "scrub_pannier_gel": {
+          "prompt": "scrub pannier gel",
+          "vector_path": "vectors\\degan_v2__scrub_pannier_gel.npy",
+          "count": 2,
+          "updated_at_utc": "2026-03-31T04:13:41.098514+00:00"
         }
       }
     }

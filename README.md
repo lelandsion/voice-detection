@@ -52,12 +52,55 @@ Install the random-word dependency before running the prompt workflow:
 pip install -r requirements.txt
 ```
 
+## CUDA GPU Training (Windows)
+
+The training scripts can run on GPU when a CUDA-enabled PyTorch build is installed.
+
+1) Activate your project venv.
+2) Install CUDA-enabled PyTorch wheels.
+
+For this repository's current Python 3.14 environment, use PyTorch nightly:
+
+```bash
+pip install --upgrade pip
+pip uninstall -y torch torchvision torchaudio
+pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+```
+
+If you prefer stable PyTorch, create a Python 3.12 virtual environment and then install stable CUDA wheels from `cu124`.
+
+3) Verify CUDA is available:
+
+```bash
+python -c "import torch; print(torch.__version__); print('cuda:', torch.cuda.is_available()); print('gpu_count:', torch.cuda.device_count())"
+```
+
+If `torch.cuda.is_available()` is `False`, update NVIDIA drivers and confirm CUDA-capable hardware.
+
+You can force training to use CUDA (and fail fast if unavailable) with:
+
+```bash
+python src/train_checkpoint.py --device cuda
+python src/train_noisy.py --device cuda
+```
+
+### 0) Train a Checkpoint for Verification
+
+```bash
+python src/train_checkpoint.py \
+    --epochs 5 \
+    --steps-per-epoch 25 \
+    --output-path checkpoints/ge2e_prompt_verifier.pt
+```
+
+This produces a real speaker-embedding checkpoint that can be used for live enrollment and verification.
+
 ### 1) Enroll a Speaker (live)
 
 ```bash
 python src/prompt_verification.py enroll \
     --speaker-id alice \
-    --model-path checkpoints/ge2e_model.pt \
+    --model-path checkpoints/ge2e_prompt_verifier.pt \
     --mode live \
     --num-prompts 3 \
     --num-words 3 \
@@ -82,7 +125,7 @@ python src/prompt_verification.py enroll \
 
 ```bash
 python src/prompt_verification.py verify \
-    --model-path checkpoints/ge2e_model.pt \
+    --model-path checkpoints/ge2e_prompt_verifier.pt \
     --mode live \
     --claimed-speaker alice \
     --threshold 0.60

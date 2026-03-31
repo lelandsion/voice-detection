@@ -29,6 +29,34 @@ HOP_LENGTH = 512
 SEGMENT_FRAMES = 128
 
 
+def resolve_device(device: str | torch.device | None = None) -> torch.device:
+    """
+    Resolve a training/inference device.
+
+    Accepted string values:
+    - "auto": use CUDA when available, otherwise CPU
+    - "cuda": require CUDA and raise if unavailable
+    - "cpu": force CPU
+    """
+    if isinstance(device, torch.device):
+        return device
+
+    requested = "auto" if device is None else str(device).strip().lower()
+    if requested == "auto":
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if requested == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError(
+                "CUDA was requested but is not available. "
+                "Install a CUDA-enabled PyTorch build and confirm your NVIDIA drivers."
+            )
+        return torch.device("cuda")
+    if requested == "cpu":
+        return torch.device("cpu")
+
+    raise ValueError(f"Unsupported device '{device}'. Use one of: auto, cuda, cpu.")
+
+
 # ── config ───────────────────────────────────────────────────────────────────
 
 @dataclass
@@ -250,6 +278,7 @@ def train(
     speaker_map: dict[str, list[Path]],
     config: TrainConfig | None = None,
     steps_per_epoch: int = 100,
+    device: str | torch.device | None = None,
     verbose: bool = True,
 ) -> tuple[LSTMEmbedder, TrainHistory]:
     """
@@ -271,7 +300,11 @@ def train(
     random.seed(cfg.random_state)
     torch.manual_seed(cfg.random_state)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = resolve_device(device)
+    if verbose:
+        print(f"Using device: {device}")
+        if device.type == "cuda":
+            print(f"CUDA device: {torch.cuda.get_device_name(0)}")
 
     model = LSTMEmbedder(cfg).to(device)
     loss_fn = GE2ELoss().to(device)
@@ -330,7 +363,7 @@ def embed(
     model: LSTMEmbedder,
     paths: list[str | Path],
     config: TrainConfig | None = None,
-    device: torch.device | None = None,
+    device: str | torch.device | None = None,
 ) -> np.ndarray:
     """
     Encode a list of audio files and return their averaged embedding.
@@ -341,8 +374,7 @@ def embed(
     Returns: (embedding_dim,) numpy array.
     """
     cfg = config or TrainConfig()
-    if device is None:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = resolve_device(device)
 
     model.eval()
     segments = []
@@ -362,6 +394,7 @@ def verify(
     test_path: str | Path,
     threshold: float = 0.5,
     config: TrainConfig | None = None,
+    device: str | torch.device | None = None,
 ) -> tuple[bool, float]:
     """
     Verify whether a test utterance matches the enrolled speaker.
@@ -373,7 +406,7 @@ def verify(
     Returns (accepted, cosine_similarity_score).
     """
     cfg = config or TrainConfig()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = resolve_device(device)
 
     template = embed(model, enrollment_paths, cfg, device)
     test_emb = embed(model, [test_path], cfg, device)

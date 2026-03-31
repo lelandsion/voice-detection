@@ -1,3 +1,11 @@
 timestamp,duration,sample_rate,path
 20260226_234918,7.202,16000,data\raw\recordings\mic_monitor_20260226_234918.wav
 20260226_234943,4.498,16000,data\raw\recordings\mic_monitor_20260226_234943.wav
+20260330_173450,3.978,16000,data\raw\recordings\enroll_degan_annoy_flight_subsection_1_20260330_173450.wav
+20260330_173502,3.978,16000,data\raw\recordings\enroll_degan_annoy_flight_subsection_2_20260330_173502.wav
+20260330_173510,3.978,16000,data\raw\recordings\enroll_degan_mythology_thirst_roundabout_1_20260330_173510.wav
+20260330_173516,3.978,16000,data\raw\recordings\enroll_degan_mythology_thirst_roundabout_2_20260330_173516.wav
+20260330_173525,3.978,16000,data\raw\recordings\enroll_degan_scrub_pannier_gel_1_20260330_173525.wav
+20260330_173531,3.978,16000,data\raw\recordings\enroll_degan_scrub_pannier_gel_2_20260330_173531.wav
+20260330_173710,2.964,16000,data\raw\recordings\verify_degan_scrub_pannier_gel_20260330_173710.wav
+20260330_173737,2.964,16000,data\raw\recordings\verify_degan_scrub_pannier_gel_20260330_173737.wav
