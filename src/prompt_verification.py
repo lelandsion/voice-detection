@@ -12,6 +12,7 @@ from typing import Any
 import numpy as np
 import torch
 
+
 try:
     from wonderwords import RandomWord
 except ImportError:
