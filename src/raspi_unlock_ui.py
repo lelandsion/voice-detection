@@ -160,7 +160,7 @@ class RaspiVoiceUnlockUI:
         ttk.Label(frame, text="Threshold").grid(row=2, column=3, sticky="e", pady=(8, 0))
         ttk.Entry(frame, textvariable=self.threshold_var, width=8).grid(row=2, column=4, sticky="w", padx=6, pady=(8, 0))
 
-        ttk.Label(frame, text="Seconds").grid(row=3, column=0, sticky="w", pady=(8, 0))
+        ttk.Label(frame, text="Max Sec").grid(row=3, column=0, sticky="w", pady=(8, 0))
         ttk.Entry(frame, textvariable=self.seconds_var, width=8).grid(row=3, column=1, sticky="w", padx=6, pady=(8, 0))
 
         ttk.Label(frame, text="Reference").grid(row=3, column=2, sticky="e", pady=(8, 0))
@@ -336,7 +336,20 @@ class RaspiVoiceUnlockUI:
 
             prompt_key = slugify(prompt_text)
             prefix = f"unlock_{slugify(speaker)}_{prompt_key}"
-            result = self.recorder.record_for(seconds=seconds, save=True, file_prefix=prefix)
+
+            _vad_msgs = {
+                "calibrating": "Calibrating mic...",
+                "waiting": "Listening for speech...",
+                "speaking": "Recording...",
+                "hang": "Recording...",
+                "done": "Processing...",
+            }
+            result = self.recorder.record_vad(
+                max_seconds=seconds,
+                save=True,
+                file_prefix=prefix,
+                on_state_change=lambda s: self._set_status(_vad_msgs.get(s, "Listening...")),
+            )
             if result.saved_path is None:
                 raise RuntimeError("No audio file captured")
 
@@ -401,15 +414,34 @@ class RaspiVoiceUnlockUI:
                 self._set_prompt(prompt_text)
 
                 for take_idx in range(takes_n):
-                    self._set_status(
-                        f"Enroll: prompt {prompt_idx + 1}/{prompts_n}, take {take_idx + 1}/{takes_n}. Speak now..."
-                    )
-                    prefix = f"enroll_{slugify(speaker)}_{slugify(prompt_text)}_{take_idx + 1}"
-                    rec = self.recorder.record_for(seconds=seconds, save=True, file_prefix=prefix)
-                    if rec.saved_path is None:
-                        raise RuntimeError("No audio file captured during enrollment")
-                    new_prompts.setdefault(prompt_text, []).append(rec.saved_path)
+                    while True:
+                        base_msg = f"Enroll {prompt_idx + 1}/{prompts_n} take {take_idx + 1}/{takes_n}"
+                        _enroll_vad_msgs = {
+                            "calibrating": f"{base_msg}: Calibrating mic...",
+                            "waiting": f"{base_msg}: Speak when ready...",
+                            "speaking": f"{base_msg}: Recording...",
+                            "hang": f"{base_msg}: Recording...",
+                        }
+                        prefix = f"enroll_{slugify(speaker)}_{slugify(prompt_text)}_{take_idx + 1}"
+                        try:
+                            rec = self.recorder.record_vad(
+                                max_seconds=seconds,
+                                save=True,
+                                file_prefix=prefix,
+                                on_state_change=lambda s, m=_enroll_vad_msgs: self._set_status(m.get(s, "Recording...")),
+                            )
+                        except RuntimeError as exc:
+                            if "No speech detected" in str(exc):
+                                self._set_status(f"{base_msg}: No speech detected — retrying...")
+                                sd.sleep(600)
+                                continue
+                            raise
+                        if rec.saved_path is None:
+                            raise RuntimeError("No audio file captured during enrollment")
+                        new_prompts.setdefault(prompt_text, []).append(rec.saved_path)
+                        break
 
+            self._set_status("Processing recordings...")
             for prompt_text, paths in new_prompts.items():
                 vecs = []
                 for p in paths:
