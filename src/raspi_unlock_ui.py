@@ -270,6 +270,20 @@ class RaspiVoiceUnlockUI:
             command=self._enroll_async
         ).pack(side="left", padx=5)
 
+        ttk.Button(
+            button_row,
+            text="Set Password",
+            style="Modern.TButton",
+            command=self._set_password_dialog
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            button_row,
+            text="Password Unlock",
+            style="Modern.TButton",
+            command=self._password_unlock_dialog
+        ).pack(side="left", padx=5)
+
         # ===== STATUS =====
         status_row = tk.Frame(inner, bg=CARD)
         status_row.pack(fill="x", pady=(10, 0))
@@ -583,7 +597,7 @@ class RaspiVoiceUnlockUI:
 
         self.password_store.set_password(pwd)
         self._set_status("Fallback password set")
-        messagebox.showinfo("Password", "Fallback password saved.")
+        # messagebox.showinfo("Password", "Fallback password saved.")
 
     def _password_unlock_dialog(self) -> None:
         if not self.password_store.has_password():
