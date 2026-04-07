@@ -18,6 +18,11 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
 import torch
 
+ENROLL_PROMPTS = 3
+ENROLL_TAKES = 2
+REFERENCE_MODE = "speaker-average"
+THRESHOLD = 0.12
+
 try:
     from .audio import MicrophoneRecorder
     from .prompt_verification import EnrollmentDB, load_embedding_model
@@ -134,10 +139,10 @@ class RaspiVoiceUnlockUI:
         self._new_prompt()
 
     def _build_ui(self) -> None:
-        frame = ttk.Frame(self.root, padding=20)
-        frame.pack(fill=tk.BOTH, expand=True)
+        self.root.geometry("1000x700")
+        self.root.configure(bg="#0b1220")  # deep dark
 
-        style = ttk.Style(self.root)
+        style = ttk.Style()
         style.theme_use("clam")
         style.configure("TFrame", background="#111827")
         style.configure("TLabel", background="#111827", foreground="#f3f4f6", font=("DejaVu Sans", 12))
@@ -175,32 +180,203 @@ class RaspiVoiceUnlockUI:
         ttk.Label(frame, text="Enroll prompts").grid(row=3, column=4, sticky="e", pady=(8, 0))
         ttk.Entry(frame, textvariable=self.enroll_prompts_var, width=6).grid(row=3, column=5, sticky="w", padx=6, pady=(8, 0))
 
-        ttk.Label(frame, text="Enroll takes").grid(row=4, column=4, sticky="e", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.enroll_takes_var, width=6).grid(row=4, column=5, sticky="w", padx=6, pady=(8, 0))
+        # Colors
+        BG = "#0b1220"
+        CARD = "#111827"
+        ACCENT = "#60a5fa"  # light blue
+        TEXT = "#e5e7eb"
+        MUTED = "#9ca3af"
+        BUTTON = "#1d4ed8"
+        BUTTON_HOVER = "#2563eb"
 
-        ttk.Separator(frame, orient="horizontal").grid(row=5, column=0, columnspan=6, sticky="ew", pady=14)
+        # Fonts
+        TITLE = ("Segoe UI", 26, "bold")
+        PROMPT = ("Segoe UI", 24, "bold")
+        BODY = ("Segoe UI", 11)
 
-        ttk.Label(frame, text="Current Prompt", style="State.TLabel").grid(row=6, column=0, columnspan=6, sticky="w")
-        ttk.Label(frame, textvariable=self.prompt_text_var, style="Prompt.TLabel", wraplength=1100).grid(
-            row=7, column=0, columnspan=6, sticky="w", pady=(8, 16)
+        # Base styles
+        style.configure("TFrame", background=BG)
+        style.configure("Card.TFrame", background=CARD)
+        style.configure("TLabel", background=CARD, foreground=TEXT, font=BODY)
+
+        # Fake "rounded" button look
+        style.configure(
+            "Modern.TButton",
+            background=BUTTON,
+            foreground="white",
+            padding=10,
+            borderwidth=0,
+            focusthickness=3,
+            focuscolor="none",
+            font=("Segoe UI", 11, "bold")
         )
 
-        actions = ttk.Frame(frame)
-        actions.grid(row=8, column=0, columnspan=6, sticky="w")
-        ttk.Button(actions, text="New Prompt", command=self._new_prompt).pack(side=tk.LEFT)
-        ttk.Button(actions, text="Verify Voice", command=self._verify_async).pack(side=tk.LEFT, padx=8)
-        ttk.Button(actions, text="Enroll Voice", command=self._enroll_async).pack(side=tk.LEFT, padx=8)
-        ttk.Button(actions, text="Set Password", command=self._set_password_dialog).pack(side=tk.LEFT, padx=8)
-        ttk.Button(actions, text="Unlock With Password", command=self._password_unlock_dialog).pack(side=tk.LEFT, padx=8)
+        style.map(
+            "Modern.TButton",
+            background=[("active", BUTTON_HOVER)],
+        )
 
-        ttk.Label(frame, text="Status").grid(row=9, column=0, sticky="w", pady=(18, 0))
-        ttk.Label(frame, textvariable=self.status_var, style="State.TLabel").grid(row=9, column=1, columnspan=4, sticky="w", pady=(18, 0))
+        # MAIN CONTAINER (center everything)
+        container = ttk.Frame(self.root)
+        container.place(relx=0.5, rely=0.5, anchor="center")
 
-        ttk.Label(frame, text="Score").grid(row=10, column=0, sticky="w", pady=(4, 0))
-        ttk.Label(frame, textvariable=self.score_var).grid(row=10, column=1, columnspan=4, sticky="w", pady=(4, 0))
+        # ===== TITLE =====
+        title = tk.Label(
+            container,
+            text="Voice Unlock",
+            font=TITLE,
+            fg="white",
+            bg=BG
+        )
+        title.pack(pady=(0, 20))
 
-        frame.grid_columnconfigure(1, weight=1)
-        frame.grid_columnconfigure(3, weight=1)
+        # ===== CARD =====
+        card = tk.Frame(
+            container,
+            bg=CARD,
+            bd=0,
+            highlightthickness=0
+        )
+        card.pack(padx=20, pady=10, fill="both")
+
+        inner = tk.Frame(card, bg=CARD)
+        inner.pack(padx=30, pady=30)
+
+        # ===== MODEL + SPEAKER ROW =====
+        top_row = tk.Frame(inner, bg=CARD)
+        top_row.pack(fill="x", pady=(0, 15))
+
+        self.model_box = ttk.Combobox(
+            top_row,
+            textvariable=self.model_var,
+            state="readonly",
+            width=45
+        )
+        self.model_box.pack(side="left", padx=(0, 10))
+
+        self.speaker_box = ttk.Combobox(
+            top_row,
+            textvariable=self.speaker_var,
+            width=20
+        )
+        self.speaker_box.pack(side="left")
+
+        # ===== PROMPT =====
+        tk.Label(
+            inner,
+            text="Say this phrase",
+            fg=MUTED,
+            bg=CARD,
+            font=("Segoe UI", 11)
+        ).pack(anchor="w")
+
+        tk.Label(
+            inner,
+            textvariable=self.prompt_text_var,
+            fg=ACCENT,
+            bg=CARD,
+            font=PROMPT,
+            wraplength=700,
+            justify="left"
+        ).pack(anchor="w", pady=(5, 20))
+
+        # ===== BUTTONS =====
+        button_row = tk.Frame(inner, bg=CARD)
+        button_row.pack(fill="x", pady=(0, 20))
+
+        ttk.Button(
+            button_row,
+            text="New Prompt",
+            style="Modern.TButton",
+            command=self._new_prompt
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            button_row,
+            text= "Verify",
+            style="Modern.TButton",
+            command=self._verify_async
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            button_row,
+            text="Enroll",
+            style="Modern.TButton",
+            command=self._enroll_async
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            button_row,
+            text="Set Password",
+            style="Modern.TButton",
+            command=self._set_password_dialog
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            button_row,
+            text="Password Unlock",
+            style="Modern.TButton",
+            command=self._password_unlock_dialog
+        ).pack(side="left", padx=5)
+
+        # ===== STATUS =====
+        status_row = tk.Frame(inner, bg=CARD)
+        status_row.pack(fill="x", pady=(10, 0))
+
+        tk.Label(
+            status_row,
+            text="Status:",
+            fg=MUTED,
+            bg=CARD
+        ).pack(side="left")
+
+        self.status_label = tk.Label(
+            status_row,
+            textvariable=self.status_var,
+            fg="#fbbf24",
+            bg=CARD,
+            font=("Segoe UI", 14, "bold")
+        )
+        self.status_label.pack(side="left", padx=10)
+
+        # ===== SCORE =====
+        score_row = tk.Frame(inner, bg=CARD)
+        score_row.pack(fill="x", pady=(5, 0))
+
+        tk.Label(
+            score_row,
+            text="Confidence:",
+            fg=MUTED,
+            bg=CARD
+        ).pack(side="left")
+
+        tk.Label(
+            score_row,
+            textvariable=self.score_var,
+            fg=TEXT,
+            bg=CARD
+        ).pack(side="left", padx=10)
+
+        # ===== RECORD TIME =====
+        bottom_row = tk.Frame(inner, bg=CARD)
+        bottom_row.pack(fill="x", pady=(15, 0))
+
+        tk.Label(
+            bottom_row,
+            text="Recording (seconds):",
+            fg=MUTED,
+            bg=CARD
+        ).pack(side="left")
+
+        tk.Entry(
+            bottom_row,
+            textvariable=self.seconds_var,
+            width=6,
+            bg="#1f2937",
+            fg="white",
+            insertbackground="white",
+            relief="flat"
+        ).pack(side="left", padx=10)
 
     def _refresh_models(self) -> None:
         checkpoints = sorted(Path(self.args.checkpoints_dir).glob("*.pt"))
@@ -318,7 +494,7 @@ class RaspiVoiceUnlockUI:
             model_path = self.model_var.get().strip()
             speaker = self.speaker_var.get().strip()
             prompt_text = self.prompt_text_var.get().strip()
-            ref_mode = self.ref_mode_var.get().strip() or "auto"
+            ref_mode = REFERENCE_MODE
 
             if not model_path:
                 raise ValueError("Select a model checkpoint first.")
@@ -327,7 +503,7 @@ class RaspiVoiceUnlockUI:
             if not prompt_text or prompt_text == "Press 'New Prompt' to begin.":
                 raise ValueError("Generate a prompt first.")
 
-            threshold = float(self.threshold_var.get())
+            threshold = THRESHOLD
             seconds = float(self.seconds_var.get())
             if seconds <= 0:
                 raise ValueError("Record seconds must be > 0")
@@ -397,8 +573,8 @@ class RaspiVoiceUnlockUI:
             if not speaker:
                 raise ValueError("Select a speaker first (or create one by typing it in the speaker box).")
 
-            prompts_n = int(self.enroll_prompts_var.get())
-            takes_n = int(self.enroll_takes_var.get())
+            prompts_n = ENROLL_PROMPTS
+            takes_n = ENROLL_TAKES
             seconds = float(self.seconds_var.get())
 
             if prompts_n <= 0 or takes_n <= 0:
@@ -488,7 +664,7 @@ class RaspiVoiceUnlockUI:
 
         self.password_store.set_password(pwd)
         self._set_status("Fallback password set")
-        messagebox.showinfo("Password", "Fallback password saved.")
+        # messagebox.showinfo("Password", "Fallback password saved.")
 
     def _password_unlock_dialog(self) -> None:
         if not self.password_store.has_password():
@@ -516,7 +692,19 @@ class RaspiVoiceUnlockUI:
         messagebox.showinfo("Enrollment", f"Enrollment saved for '{speaker}'.")
 
     def _set_status(self, text: str) -> None:
-        self.root.after(0, lambda: self.status_var.set(text))
+        def update():
+            self.status_var.set(text)
+
+            if "Unlocked" in text:
+                self.status_label.config(foreground="#22c55e")  # green
+            elif "Denied" in text:
+                self.status_label.config(foreground="#ef4444")  # red
+            elif "Error" in text:
+                self.status_label.config(foreground="#f97316")  # orange
+            else:
+                self.status_label.config(foreground="#eab308")  # yellow
+
+        self.root.after(0, update)
 
     def _set_score(self, text: str) -> None:
         self.root.after(0, lambda: self.score_var.set(text))
