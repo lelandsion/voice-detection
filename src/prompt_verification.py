@@ -123,13 +123,13 @@ class EnrollmentDB:
             prev["count"] = int(prev_count + count)
             prev["updated_at_utc"] = timestamp
             prev["prompt"] = prompt
-            prev["vector_path"] = str(Path("vectors") / vec_file)
+            prev["vector_path"] = (Path("vectors") / vec_file).as_posix()
             return
 
         np.save(vec_path, _unit_vector(embedding).astype(np.float32))
         prompt_map[prompt_key] = EnrollmentPromptEntry(
             prompt=prompt,
-            vector_path=str(Path("vectors") / vec_file),
+            vector_path=(Path("vectors") / vec_file).as_posix(),
             count=int(count),
             updated_at_utc=timestamp,
         ).__dict__

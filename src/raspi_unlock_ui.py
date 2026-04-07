@@ -144,6 +144,41 @@ class RaspiVoiceUnlockUI:
 
         style = ttk.Style()
         style.theme_use("clam")
+        style.configure("TFrame", background="#111827")
+        style.configure("TLabel", background="#111827", foreground="#f3f4f6", font=("DejaVu Sans", 12))
+        style.configure("Title.TLabel", font=("DejaVu Sans", 24, "bold"), foreground="#ffffff")
+        style.configure("Prompt.TLabel", font=("DejaVu Sans", 20, "bold"), foreground="#93c5fd")
+        style.configure("State.TLabel", font=("DejaVu Sans", 18, "bold"), foreground="#fbbf24")
+
+        ttk.Label(frame, text="Voice Unlock", style="Title.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 12))
+
+        ttk.Label(frame, text="Model").grid(row=1, column=0, sticky="w")
+        self.model_box = ttk.Combobox(frame, textvariable=self.model_var, state="readonly", width=52)
+        self.model_box.grid(row=1, column=1, columnspan=3, sticky="ew", padx=6)
+        ttk.Button(frame, text="Refresh", command=self._refresh_models).grid(row=1, column=4, sticky="w")
+
+        ttk.Label(frame, text="Speaker").grid(row=2, column=0, sticky="w", pady=(8, 0))
+        self.speaker_box = ttk.Combobox(frame, textvariable=self.speaker_var, state="normal", width=26)
+        self.speaker_box.grid(row=2, column=1, sticky="w", padx=6, pady=(8, 0))
+        ttk.Button(frame, text="Reload", command=self._refresh_speakers).grid(row=2, column=2, sticky="w", pady=(8, 0))
+
+        ttk.Label(frame, text="Threshold").grid(row=2, column=3, sticky="e", pady=(8, 0))
+        ttk.Entry(frame, textvariable=self.threshold_var, width=8).grid(row=2, column=4, sticky="w", padx=6, pady=(8, 0))
+
+        ttk.Label(frame, text="Max Sec").grid(row=3, column=0, sticky="w", pady=(8, 0))
+        ttk.Entry(frame, textvariable=self.seconds_var, width=8).grid(row=3, column=1, sticky="w", padx=6, pady=(8, 0))
+
+        ttk.Label(frame, text="Reference").grid(row=3, column=2, sticky="e", pady=(8, 0))
+        ttk.Combobox(
+            frame,
+            textvariable=self.ref_mode_var,
+            state="readonly",
+            values=["prompt", "speaker-average", "auto"],
+            width=16,
+        ).grid(row=3, column=3, sticky="w", padx=6, pady=(8, 0))
+
+        ttk.Label(frame, text="Enroll prompts").grid(row=3, column=4, sticky="e", pady=(8, 0))
+        ttk.Entry(frame, textvariable=self.enroll_prompts_var, width=6).grid(row=3, column=5, sticky="w", padx=6, pady=(8, 0))
 
         # Colors
         BG = "#0b1220"
@@ -477,7 +512,20 @@ class RaspiVoiceUnlockUI:
 
             prompt_key = slugify(prompt_text)
             prefix = f"unlock_{slugify(speaker)}_{prompt_key}"
-            result = self.recorder.record_for(seconds=seconds, save=True, file_prefix=prefix)
+
+            _vad_msgs = {
+                "calibrating": "Calibrating mic...",
+                "waiting": "Listening for speech...",
+                "speaking": "Recording...",
+                "hang": "Recording...",
+                "done": "Processing...",
+            }
+            result = self.recorder.record_vad(
+                max_seconds=seconds,
+                save=True,
+                file_prefix=prefix,
+                on_state_change=lambda s: self._set_status(_vad_msgs.get(s, "Listening...")),
+            )
             if result.saved_path is None:
                 raise RuntimeError("No audio file captured")
 
@@ -542,15 +590,34 @@ class RaspiVoiceUnlockUI:
                 self._set_prompt(prompt_text)
 
                 for take_idx in range(takes_n):
-                    self._set_status(
-                        f"Enroll: prompt {prompt_idx + 1}/{prompts_n}, take {take_idx + 1}/{takes_n}. Speak now..."
-                    )
-                    prefix = f"enroll_{slugify(speaker)}_{slugify(prompt_text)}_{take_idx + 1}"
-                    rec = self.recorder.record_for(seconds=seconds, save=True, file_prefix=prefix)
-                    if rec.saved_path is None:
-                        raise RuntimeError("No audio file captured during enrollment")
-                    new_prompts.setdefault(prompt_text, []).append(rec.saved_path)
+                    while True:
+                        base_msg = f"Enroll {prompt_idx + 1}/{prompts_n} take {take_idx + 1}/{takes_n}"
+                        _enroll_vad_msgs = {
+                            "calibrating": f"{base_msg}: Calibrating mic...",
+                            "waiting": f"{base_msg}: Speak when ready...",
+                            "speaking": f"{base_msg}: Recording...",
+                            "hang": f"{base_msg}: Recording...",
+                        }
+                        prefix = f"enroll_{slugify(speaker)}_{slugify(prompt_text)}_{take_idx + 1}"
+                        try:
+                            rec = self.recorder.record_vad(
+                                max_seconds=seconds,
+                                save=True,
+                                file_prefix=prefix,
+                                on_state_change=lambda s, m=_enroll_vad_msgs: self._set_status(m.get(s, "Recording...")),
+                            )
+                        except RuntimeError as exc:
+                            if "No speech detected" in str(exc):
+                                self._set_status(f"{base_msg}: No speech detected — retrying...")
+                                sd.sleep(600)
+                                continue
+                            raise
+                        if rec.saved_path is None:
+                            raise RuntimeError("No audio file captured during enrollment")
+                        new_prompts.setdefault(prompt_text, []).append(rec.saved_path)
+                        break
 
+            self._set_status("Processing recordings...")
             for prompt_text, paths in new_prompts.items():
                 vecs = []
                 for p in paths:
