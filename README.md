@@ -15,6 +15,124 @@ For segmentation and robustness, VAD is applied before feature extraction, and n
 
 Training and evaluation primarily use Mozilla Common Voice as the clean speech source, with MUSAN used for controlled noise mixing across SNR levels and VOiCES referenced for realistic reverberant/far-field robustness testing. This combination supports reproducible benchmarking from clean baselines to progressively harder noisy deployment conditions.
 
+## Reproducible Noisy Training Dataset
+
+Use the preprocessing script below to generate a deterministic noisy dataset that mixes each clean utterance with one music clip and one environmental clip at sampled SNR levels.
+
+```bash
+python src/noisy_dataset.py \
+    --music-noise-dir "data/musan/music" \
+    --env-noise-dir "data/musan/noise" \
+    --num-augmentations 2 \
+    --seed 42
+```
+
+Default outputs:
+
+- `data/processed/noisy/audio_files/` (generated noisy wav files)
+- `data/processed/commonvoice_noisy.csv` (training metadata with noisy paths and noise details)
+- `data/processed/commonvoice_noisy_manifest.json` (full config + generation summary)
+
+To keep results reproducible, keep `--seed`, `--music-snr-db`, `--env-snr-db`, and input datasets fixed.
+
+You can train on the noisy metadata by passing the generated CSV and audio root into existing training loaders (for example, `build_speaker_map` in `src/train.py`).
+
+## Random Prompt Voice Verification Pipeline
+
+The repository now includes a prompt-aware enrollment and verification CLI that:
+
+- captures live microphone audio or uses recorded files,
+- extracts speaker embeddings from the trained LSTM encoder,
+- compares against enrolled voices using cosine similarity,
+- generates random word sequences with `wonderwords` for text-dependent verification.
+
+Install the random-word dependency before running the prompt workflow:
+
+```bash
+pip install -r requirements.txt
+```
+
+## CUDA GPU Training (Windows)
+
+The training scripts can run on GPU when a CUDA-enabled PyTorch build is installed.
+
+1) Activate your project venv.
+2) Install CUDA-enabled PyTorch wheels.
+
+For this repository's current Python 3.14 environment, use PyTorch nightly:
+
+```bash
+pip install --upgrade pip
+pip uninstall -y torch torchvision torchaudio
+pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+```
+
+If you prefer stable PyTorch, create a Python 3.12 virtual environment and then install stable CUDA wheels from `cu124`.
+
+3) Verify CUDA is available:
+
+```bash
+python -c "import torch; print(torch.__version__); print('cuda:', torch.cuda.is_available()); print('gpu_count:', torch.cuda.device_count())"
+```
+
+If `torch.cuda.is_available()` is `False`, update NVIDIA drivers and confirm CUDA-capable hardware.
+
+You can force training to use CUDA (and fail fast if unavailable) with:
+
+```bash
+python src/train_checkpoint.py --device cuda
+python src/train_noisy.py --device cuda
+```
+
+### 0) Train a Checkpoint for Verification
+
+```bash
+python src/train_checkpoint.py \
+    --epochs 5 \
+    --steps-per-epoch 25 \
+    --output-path checkpoints/ge2e_prompt_verifier.pt
+```
+
+This produces a real speaker-embedding checkpoint that can be used for live enrollment and verification.
+
+### 1) Enroll a Speaker (live)
+
+```bash
+python src/prompt_verification.py enroll \
+    --speaker-id alice \
+    --model-path checkpoints/ge2e_prompt_verifier.pt \
+    --mode live \
+    --num-prompts 3 \
+    --num-words 3 \
+    --takes-per-prompt 2 \
+    --seconds 3.0
+```
+
+This will generate 3 random prompts of 3 words each and ask the user to record each prompt.
+
+### 2) Enroll a Speaker (recorded files)
+
+```bash
+python src/prompt_verification.py enroll \
+    --speaker-id alice \
+    --model-path checkpoints/ge2e_model.pt \
+    --mode recorded \
+    --audio-paths data/raw/recordings/alice_1.wav data/raw/recordings/alice_2.wav \
+    --prompt-texts "My voice is my password"
+```
+
+### 3) Verify with Randomized Prompt
+
+```bash
+python src/prompt_verification.py verify \
+    --model-path checkpoints/ge2e_prompt_verifier.pt \
+    --mode live \
+    --claimed-speaker alice \
+    --threshold 0.60
+```
+
+For recorded verification instead of live microphone input, use `--mode recorded --audio-path <wav_or_mp3_path>`.
+Enrollment vectors are saved under `data/processed/enrollment_db/`.
 
 ## Related Work
 Voice authentication research spans text-dependent and continuous verification settings. Classical statistical systems, especially GMM-based approaches, established early speaker modeling baselines and remain useful reference points due to interpretability. Later work improved short-utterance reliability by incorporating quality-aware scoring under duration limits and noise contamination.

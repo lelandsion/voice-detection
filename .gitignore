@@ -1,2 +1,14 @@
+
+__pycache__/
+*.py[cod]
+
+# Large local datasets and generated artifacts
+data/musan/
+data/processed/noisy/
+data/processed/commonvoice_noisy.csv
+data/processed/commonvoice_noisy_manifest.json
+musan.tar.gz
+
 ./data/commonvoice-v24_en-AU 3data/
 .DS_Store
+
