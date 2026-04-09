@@ -44,16 +44,11 @@ def level_to_quality(level: float) -> str:
 
 
 def preprocess_audio(audio: np.ndarray, sample_rate: int) -> np.ndarray:
-	"""Apply simple noise gate and peak normalization."""
-	noise_len = min(int(sample_rate * 0.5), len(audio))
-	if noise_len == 0:
+	"""Peak normalization only. Noise gate removed — VAD already trims silence."""
+	peak = np.max(np.abs(audio))
+	if peak < 1e-8:
 		return audio.astype(np.float32)
-
-	noise_clip = audio[:noise_len]
-	noise_std = np.std(noise_clip)
-	threshold = noise_std * 1.5
-	reduced = np.where(np.abs(audio) < threshold, 0.0, audio)
-	normed = reduced / (np.max(np.abs(reduced)) + 1e-8)
+	normed = audio / peak
 	return normed.astype(np.float32)
 
 

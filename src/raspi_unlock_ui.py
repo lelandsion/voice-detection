@@ -21,7 +21,7 @@ import torch
 ENROLL_PROMPTS = 3
 ENROLL_TAKES = 2
 REFERENCE_MODE = "speaker-average"
-THRESHOLD = 0.12
+THRESHOLD = 0.55
 
 try:
     from .audio import MicrophoneRecorder
@@ -149,36 +149,6 @@ class RaspiVoiceUnlockUI:
         style.configure("Title.TLabel", font=("DejaVu Sans", 24, "bold"), foreground="#ffffff")
         style.configure("Prompt.TLabel", font=("DejaVu Sans", 20, "bold"), foreground="#93c5fd")
         style.configure("State.TLabel", font=("DejaVu Sans", 18, "bold"), foreground="#fbbf24")
-
-        ttk.Label(frame, text="Voice Unlock", style="Title.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 12))
-
-        ttk.Label(frame, text="Model").grid(row=1, column=0, sticky="w")
-        self.model_box = ttk.Combobox(frame, textvariable=self.model_var, state="readonly", width=52)
-        self.model_box.grid(row=1, column=1, columnspan=3, sticky="ew", padx=6)
-        ttk.Button(frame, text="Refresh", command=self._refresh_models).grid(row=1, column=4, sticky="w")
-
-        ttk.Label(frame, text="Speaker").grid(row=2, column=0, sticky="w", pady=(8, 0))
-        self.speaker_box = ttk.Combobox(frame, textvariable=self.speaker_var, state="normal", width=26)
-        self.speaker_box.grid(row=2, column=1, sticky="w", padx=6, pady=(8, 0))
-        ttk.Button(frame, text="Reload", command=self._refresh_speakers).grid(row=2, column=2, sticky="w", pady=(8, 0))
-
-        ttk.Label(frame, text="Threshold").grid(row=2, column=3, sticky="e", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.threshold_var, width=8).grid(row=2, column=4, sticky="w", padx=6, pady=(8, 0))
-
-        ttk.Label(frame, text="Max Sec").grid(row=3, column=0, sticky="w", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.seconds_var, width=8).grid(row=3, column=1, sticky="w", padx=6, pady=(8, 0))
-
-        ttk.Label(frame, text="Reference").grid(row=3, column=2, sticky="e", pady=(8, 0))
-        ttk.Combobox(
-            frame,
-            textvariable=self.ref_mode_var,
-            state="readonly",
-            values=["prompt", "speaker-average", "auto"],
-            width=16,
-        ).grid(row=3, column=3, sticky="w", padx=6, pady=(8, 0))
-
-        ttk.Label(frame, text="Enroll prompts").grid(row=3, column=4, sticky="e", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.enroll_prompts_var, width=6).grid(row=3, column=5, sticky="w", padx=6, pady=(8, 0))
 
         # Colors
         BG = "#0b1220"
