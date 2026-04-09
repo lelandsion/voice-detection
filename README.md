@@ -20,11 +20,20 @@ Training and evaluation primarily use Mozilla Common Voice as the clean speech s
 Use the preprocessing script below to generate a deterministic noisy dataset that mixes each clean utterance with one music clip and one environmental clip at sampled SNR levels.
 
 ```bash
-python src/noisy_dataset.py \
-    --music-noise-dir "data/musan/music" \
-    --env-noise-dir "data/musan/noise" \
-    --num-augmentations 2 \
-    --seed 42
+python src/train_noisy.py \
+  --noisy-csv data/processed/commonvoice_noisy.csv \
+  --noisy-dir data/processed/noisy/audio_files \
+  --clean-csv data/commonvoice-v24_en-AU\ 3/commonvoice-v24_en-AU.csv \
+  --clean-dir data/commonvoice-v24_en-AU\ 3/audio_files \
+  --epochs 30 \
+  --steps 100 \
+  --lr 1e-4 \
+  --n-speakers 8 \
+  --n-utterances 5 \
+  --min-utterances 5 \
+  --seed 42 \
+  --device auto \
+  --out checkpoints/model_noisy.pt
 ```
 
 Default outputs:
