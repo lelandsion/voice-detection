@@ -275,19 +275,22 @@ class RaspiVoiceUnlockUI:
             command=self._enroll_async
         ).pack(side="left", padx=5)
 
+        '''
+       
         ttk.Button(
             button_row,
             text="Set Password",
             style="Modern.TButton",
             command=self._set_password_dialog
         ).pack(side="left", padx=5)
-
+        
         ttk.Button(
             button_row,
             text="Password Unlock",
             style="Modern.TButton",
             command=self._password_unlock_dialog
         ).pack(side="left", padx=5)
+        '''
 
         # ===== STATUS =====
         status_row = tk.Frame(inner, bg=CARD)
@@ -453,6 +456,21 @@ class RaspiVoiceUnlockUI:
     def _enroll_async(self) -> None:
         if self._is_busy:
             return
+
+        speaker = self.speaker_var.get().strip()
+
+        if not speaker:
+            speaker = simpledialog.askstring(
+                "Speaker",
+                "Enter speaker name:",
+                parent=self.root
+            )
+            if not speaker:
+                self._set_status("Enrollment cancelled")
+                return
+
+            self.speaker_var.set(speaker)
+
         thread = threading.Thread(target=self._enroll_worker, daemon=True)
         thread.start()
 
@@ -579,7 +597,7 @@ class RaspiVoiceUnlockUI:
                         except RuntimeError as exc:
                             if "No speech detected" in str(exc):
                                 self._set_status(f"{base_msg}: No speech detected — retrying...")
-                                sd.sleep(600)
+                                # d.sleep(600)
                                 continue
                             raise
                         if rec.saved_path is None:
@@ -659,7 +677,7 @@ class RaspiVoiceUnlockUI:
         self._refresh_speakers()
         self.speaker_var.set(speaker)
         self._new_prompt()
-        messagebox.showinfo("Enrollment", f"Enrollment saved for '{speaker}'.")
+        # messagebox.showinfo("Enrollment", f"Enrollment saved for '{speaker}'.")
 
     def _set_status(self, text: str) -> None:
         def update():
