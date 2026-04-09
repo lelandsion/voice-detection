@@ -264,7 +264,7 @@ class MicrophoneRecorder:
 						# skewing the noise floor estimate.
 						noise_peak = float(np.percentile(calib_energies, 95))
 						threshold[0] = max(noise_peak * threshold_multiplier, 1e-5)
-						print(f"[VAD] noise_peak={noise_peak:.6f}  threshold={threshold[0]:.6f}")
+						# print(f"[VAD] noise_peak={noise_peak:.6f}  threshold={threshold[0]:.6f}")
 						_notify("waiting")
 					return
 

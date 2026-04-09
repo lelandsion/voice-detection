@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "speakers": {
+    "allen": {
+      "prompts": {
+        "orange_river_apple": {
+          "prompt": "orange river apple",
+          "vector_path": "vectors/allen__orange_river_apple.npy",
+          "count": 3,
+          "updated_at_utc": "2026-04-09T09:18:48.174151+00:00"
+        },
+        "velvet_piano_storm": {
+          "prompt": "velvet piano storm",
+          "vector_path": "vectors/allen__velvet_piano_storm.npy",
+          "count": 3,
+          "updated_at_utc": "2026-04-09T09:18:48.195450+00:00"
+        },
+        "storm_lantern_river": {
+          "prompt": "storm lantern river",
+          "vector_path": "vectors/allen__storm_lantern_river.npy",
+          "count": 3,
+          "updated_at_utc": "2026-04-09T09:18:48.217073+00:00"
+        },
+        "orange_saturn_river": {
+          "prompt": "orange saturn river",
+          "vector_path": "vectors/allen__orange_saturn_river.npy",
+          "count": 3,
+          "updated_at_utc": "2026-04-09T09:18:48.238971+00:00"
+        },
+        "candle_forest_apple": {
+          "prompt": "candle forest apple",
+          "vector_path": "vectors/allen__candle_forest_apple.npy",
+          "count": 3,
+          "updated_at_utc": "2026-04-09T09:18:48.260128+00:00"
+        }
+      }
+    }
+  }
+}

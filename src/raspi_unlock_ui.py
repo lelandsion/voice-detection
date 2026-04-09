@@ -18,10 +18,10 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
 import torch
 
-ENROLL_PROMPTS = 3
-ENROLL_TAKES = 2
+ENROLL_PROMPTS = 5
+ENROLL_TAKES = 3
 REFERENCE_MODE = "speaker-average"
-THRESHOLD = 0.55
+THRESHOLD = 0.40
 
 try:
     from .audio import MicrophoneRecorder
@@ -457,19 +457,19 @@ class RaspiVoiceUnlockUI:
         if self._is_busy:
             return
 
-        speaker = self.speaker_var.get().strip()
+        current = self.speaker_var.get().strip()
+        speaker = simpledialog.askstring(
+            "Enroll Speaker",
+            "Enter speaker name:",
+            initialvalue=current,
+            parent=self.root,
+        )
+        if not speaker or not speaker.strip():
+            self._set_status("Enrollment cancelled")
+            return
 
-        if not speaker:
-            speaker = simpledialog.askstring(
-                "Speaker",
-                "Enter speaker name:",
-                parent=self.root
-            )
-            if not speaker:
-                self._set_status("Enrollment cancelled")
-                return
-
-            self.speaker_var.set(speaker)
+        speaker = speaker.strip()
+        self.speaker_var.set(speaker)
 
         thread = threading.Thread(target=self._enroll_worker, daemon=True)
         thread.start()
@@ -508,16 +508,29 @@ class RaspiVoiceUnlockUI:
                 "hang": "Recording...",
                 "done": "Processing...",
             }
-            result = self.recorder.record_vad(
-                max_seconds=seconds,
-                save=True,
-                file_prefix=prefix,
-                on_state_change=lambda s: self._set_status(_vad_msgs.get(s, "Listening...")),
-            )
-            if result.saved_path is None:
-                raise RuntimeError("No audio file captured")
+            MIN_DURATION = 1.5
+            while True:
+                result = self.recorder.record_vad(
+                    max_seconds=seconds,
+                    save=True,
+                    file_prefix=prefix,
+                    on_state_change=lambda s: self._set_status(_vad_msgs.get(s, "Listening...")),
+                )
+                if result.saved_path is None:
+                    raise RuntimeError("No audio file captured")
+                if result.duration >= MIN_DURATION:
+                    break
+                print(f"[VERIFY] too short ({result.duration:.1f}s < {MIN_DURATION}s), retrying...", flush=True)
+                self._set_status(f"Too short ({result.duration:.1f}s) — speak longer...")
+                import time; time.sleep(0.5)
+
+            print(f"\n{'='*60}", flush=True)
+            print(f"[VERIFY] speaker={speaker} prompt={prompt_key}", flush=True)
+            print(f"[VERIFY] file={result.saved_path}", flush=True)
+            print(f"[VERIFY] duration={result.duration:.2f}s rms={result.rms_level:.4f} quality={result.quality}", flush=True)
 
             query = embed(bundle.model, [result.saved_path], bundle.cfg, bundle.device)
+            print(f"[VERIFY] raw_embed norm={np.linalg.norm(query):.4f}", flush=True)
             query = unit_vector(query)
 
             scored: list[dict[str, Any]] = []
@@ -525,6 +538,7 @@ class RaspiVoiceUnlockUI:
                 ref_vec, source = self._speaker_reference_vector(speaker_id, prompt_key, ref_mode)
                 score = cosine(query, ref_vec)
                 scored.append({"speaker_id": speaker_id, "score": score, "reference": source})
+                print(f"[VERIFY] vs {speaker_id}: {score:.4f} ({source})", flush=True)
 
             scored.sort(key=lambda x: float(x["score"]), reverse=True)
             top = scored[0]
@@ -532,6 +546,8 @@ class RaspiVoiceUnlockUI:
             claimed = next((s for s in scored if s["speaker_id"] == speaker), None)
             claimed_score = float(claimed["score"]) if claimed else -1.0
             accepted = bool(claimed and claimed_score >= threshold and top["speaker_id"] == speaker)
+            print(f"[VERIFY] result: claimed={speaker} score={claimed_score:.4f} threshold={threshold} accepted={accepted}", flush=True)
+            print(f"{'='*60}", flush=True)
 
             self._set_score(f"{claimed_score:.4f} (top={top['speaker_id']} {top['score']:.4f})")
 
@@ -594,27 +610,47 @@ class RaspiVoiceUnlockUI:
                                 file_prefix=prefix,
                                 on_state_change=lambda s, m=_enroll_vad_msgs: self._set_status(m.get(s, "Recording...")),
                             )
-                        except RuntimeError as exc:
-                            if "No speech detected" in str(exc):
-                                self._set_status(f"{base_msg}: No speech detected — retrying...")
-                                # d.sleep(600)
-                                continue
-                            raise
-                        if rec.saved_path is None:
-                            raise RuntimeError("No audio file captured during enrollment")
+                            if rec.saved_path is None:
+                                raise RuntimeError("No audio file captured")
+                        except (RuntimeError, Exception) as exc:
+                            self._set_status(f"{base_msg}: {exc} — retrying...")
+                            import time; time.sleep(0.6)
+                            continue
                         new_prompts.setdefault(prompt_text, []).append(rec.saved_path)
                         break
 
             self._set_status("Processing recordings...")
+            print(f"\n{'='*60}", flush=True)
+            print(f"[ENROLL] speaker={speaker} prompts={len(new_prompts)}", flush=True)
+            OUTLIER_THRESHOLD = 0.3
             for prompt_text, paths in new_prompts.items():
                 vecs = []
                 for p in paths:
                     emb = embed(bundle.model, [p], bundle.cfg, bundle.device)
                     vecs.append(unit_vector(emb))
+                    print(f"[ENROLL] {prompt_text} file={p} norm={np.linalg.norm(emb):.4f}", flush=True)
+                if len(vecs) >= 2:
+                    from itertools import combinations
+                    pairs = [cosine(vecs[i], vecs[j]) for i, j in combinations(range(len(vecs)), 2)]
+                    print(f"[ENROLL] {prompt_text} take_consistency: {[f'{s:.4f}' for s in pairs]}", flush=True)
+                    # Drop outliers: remove vecs whose avg similarity to others is below threshold
+                    if len(vecs) >= 3:
+                        filtered = []
+                        for i, v in enumerate(vecs):
+                            others = [cosine(v, vecs[j]) for j in range(len(vecs)) if j != i]
+                            avg_sim = np.mean(others)
+                            if avg_sim >= OUTLIER_THRESHOLD:
+                                filtered.append(v)
+                            else:
+                                print(f"[ENROLL] {prompt_text} dropped take {i+1} (avg_sim={avg_sim:.4f})", flush=True)
+                        if filtered:
+                            vecs = filtered
                 prompt_vec = unit_vector(np.mean(np.stack(vecs, axis=0), axis=0))
                 self.db.upsert_prompt_embedding(speaker, prompt_text, prompt_vec, count=len(vecs))
 
             self.db.save()
+            print(f"[ENROLL] done", flush=True)
+            print(f"{'='*60}", flush=True)
             self._set_status("Enrollment complete")
             self.root.after(0, lambda: self._finalize_enrollment_ui(speaker))
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pickle
 import random
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -21,12 +22,12 @@ except ImportError:
 # ── constants ────────────────────────────────────────────────────────────────
 
 TARGET_SR = 16000
-N_MFCC = 13
+N_MFCC = 40
 N_FFT = 1024
 HOP_LENGTH = 512
 
-# number of MFCC frames per training segment (~2.7s at 16 kHz, hop=512)
-SEGMENT_FRAMES = 128
+# number of MFCC frames per training segment (~3.1s at 16 kHz, hop=512)
+SEGMENT_FRAMES = 96
 
 
 def resolve_device(device: str | torch.device | None = None) -> torch.device:
@@ -43,7 +44,11 @@ def resolve_device(device: str | torch.device | None = None) -> torch.device:
 
     requested = "auto" if device is None else str(device).strip().lower()
     if requested == "auto":
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+        if torch.backends.mps.is_available():
+            return torch.device("mps")
+        return torch.device("cpu")
     if requested == "cuda":
         if not torch.cuda.is_available():
             raise RuntimeError(
@@ -51,10 +56,14 @@ def resolve_device(device: str | torch.device | None = None) -> torch.device:
                 "Install a CUDA-enabled PyTorch build and confirm your NVIDIA drivers."
             )
         return torch.device("cuda")
+    if requested == "mps":
+        if not torch.backends.mps.is_available():
+            raise RuntimeError("MPS was requested but is not available.")
+        return torch.device("mps")
     if requested == "cpu":
         return torch.device("cpu")
 
-    raise ValueError(f"Unsupported device '{device}'. Use one of: auto, cuda, cpu.")
+    raise ValueError(f"Unsupported device '{device}'. Use one of: auto, cuda, mps, cpu.")
 
 
 # ── config ───────────────────────────────────────────────────────────────────
@@ -84,32 +93,37 @@ class TrainConfig:
 _pipeline = NormalizationPipeline(target_sr=TARGET_SR, n_mfcc=N_MFCC)
 
 
+def _extract_features(audio: np.ndarray) -> np.ndarray:
+    """Extract MFCC features. Returns (T, N_MFCC)."""
+    import librosa
+    mfccs = librosa.feature.mfcc(
+        y=audio, sr=TARGET_SR, n_mfcc=N_MFCC,
+        n_fft=N_FFT, hop_length=HOP_LENGTH,
+    )  # (N_MFCC, T)
+    return mfccs.T  # (T, N_MFCC)
+
+
 def _load_mfcc(path: str | Path, segment_frames: int) -> np.ndarray:
     """
-    Load an audio file, extract normalised MFCC sequence, and return a
-    fixed-length segment of shape (segment_frames, N_MFCC).
+    Load an audio file, extract MFCC + delta + delta-delta, and return a
+    fixed-length segment of shape (segment_frames, N_MFCC*3).
 
-    Longer clips are randomly cropped; shorter ones are zero-padded.
+    Longer clips are randomly cropped; shorter ones are tile-padded.
     """
     import librosa
 
     audio, sr = librosa.load(str(path), sr=TARGET_SR, mono=True)
     audio = _pipeline.normalize_audio(audio, sample_rate=TARGET_SR)
-    mfccs = librosa.feature.mfcc(
-        y=audio,
-        sr=TARGET_SR,
-        n_mfcc=N_MFCC,
-        n_fft=N_FFT,
-        hop_length=HOP_LENGTH,
-    ).T  # (T, 13)
+    mfccs = _extract_features(audio)  # (T, N_MFCC*3)
 
     T = mfccs.shape[0]
     if T >= segment_frames:
         start = random.randint(0, T - segment_frames)
         mfccs = mfccs[start : start + segment_frames]
     else:
-        pad = np.zeros((segment_frames - T, N_MFCC), dtype=np.float32)
-        mfccs = np.concatenate([mfccs, pad], axis=0)
+        # Tile instead of zero-pad to avoid dead regions in short recordings
+        reps = int(np.ceil(segment_frames / T))
+        mfccs = np.tile(mfccs, (reps, 1))[:segment_frames]
 
     return mfccs.astype(np.float32)
 
@@ -146,6 +160,7 @@ class SpeakerDataset(Dataset):
     Samples batches of N speakers × M utterances for GE2E training.
 
     Each __getitem__ call returns one (N*M, segment_frames, N_MFCC) tensor.
+    Pre-caches all MFCCs in memory on first use to avoid repeated disk I/O.
     """
 
     def __init__(
@@ -158,6 +173,15 @@ class SpeakerDataset(Dataset):
         self.paths = speaker_map
         self.config = config
         self.steps_per_epoch = steps_per_epoch
+        self._cache: dict[Path, np.ndarray] = {}
+
+    def _get_mfcc(self, path: Path) -> np.ndarray:
+        if path not in self._cache:
+            import librosa
+            audio, sr = librosa.load(str(path), sr=TARGET_SR, mono=True)
+            audio = _pipeline.normalize_audio(audio, sample_rate=TARGET_SR)
+            self._cache[path] = _extract_features(audio).astype(np.float32)
+        return self._cache[path]
 
     def __len__(self) -> int:
         return self.steps_per_epoch
@@ -165,12 +189,20 @@ class SpeakerDataset(Dataset):
     def __getitem__(self, _: int) -> torch.Tensor:
         N, M = self.config.n_speakers, self.config.n_utterances
         chosen = random.sample(self.speakers, N)
+        seg_len = self.config.segment_frames
 
         segments = []
         for spk in chosen:
             files = random.choices(self.paths[spk], k=M)
             for f in files:
-                seg = _load_mfcc(f, self.config.segment_frames)
+                mfccs = self._get_mfcc(f)
+                T = mfccs.shape[0]
+                if T >= seg_len:
+                    start = random.randint(0, T - seg_len)
+                    seg = mfccs[start : start + seg_len]
+                else:
+                    reps = int(np.ceil(seg_len / T))
+                    seg = np.tile(mfccs, (reps, 1))[:seg_len]
                 segments.append(seg)
 
         # (N*M, segment_frames, N_MFCC)
@@ -321,6 +353,8 @@ def train(
     loader = DataLoader(dataset, batch_size=1, num_workers=0)
 
     history = TrainHistory()
+    import time as _time
+    _train_start = _time.time()
 
     for epoch in range(1, cfg.n_epochs + 1):
         model.train()
@@ -351,8 +385,25 @@ def train(
         avg_loss = epoch_loss / steps_per_epoch
         history.loss.append(avg_loss)
 
-        if verbose and (epoch % 10 == 0 or epoch == 1):
-            print(f"epoch {epoch:3d}/{cfg.n_epochs}  loss={avg_loss:.4f}")
+        if verbose:
+            elapsed = _time.time() - _train_start
+            per_epoch = elapsed / epoch
+            remaining = per_epoch * (cfg.n_epochs - epoch)
+            pct = epoch / cfg.n_epochs * 100
+            bar = "█" * int(pct // 5) + "░" * (20 - int(pct // 5))
+            mins, secs = divmod(int(remaining), 60)
+            e_mins, e_secs = divmod(int(elapsed), 60)
+            _is_tty = sys.stderr.isatty() if hasattr(sys.stderr, 'isatty') else False
+            if _is_tty:
+                # Terminal: loss every 10 epochs, progress bar refreshes in place
+                if epoch == 1 or epoch % 10 == 0 or epoch == cfg.n_epochs:
+                    print(f"\nepoch {epoch:3d}/{cfg.n_epochs}  loss={avg_loss:.4f}", file=sys.stderr, flush=True)
+                print(f"\r  [{bar}] {pct:.0f}%  ETA {mins}m{secs:02d}s  elapsed {e_mins}m{e_secs:02d}s", end="", file=sys.stderr, flush=True)
+                if epoch == cfg.n_epochs:
+                    print(file=sys.stderr, flush=True)
+            else:
+                # File/pipe: one line per epoch, no \r
+                print(f"epoch {epoch:3d}/{cfg.n_epochs}  loss={avg_loss:.4f}  [{bar}] {pct:.0f}%  ETA {mins}m{secs:02d}s", flush=True)
 
     return model, history
 
@@ -364,28 +415,50 @@ def embed(
     paths: list[str | Path],
     config: TrainConfig | None = None,
     device: str | torch.device | None = None,
+    n_crops: int = 5,
 ) -> np.ndarray:
     """
     Encode a list of audio files and return their averaged embedding.
 
-    Passing multiple utterances from the same speaker and averaging gives
-    a more stable speaker template (d-vector).
+    For each file, takes n_crops evenly-spaced segments and averages them
+    for a more stable d-vector.
 
     Returns: (embedding_dim,) numpy array.
     """
+    import librosa as _lr
+
     cfg = config or TrainConfig()
     device = resolve_device(device)
 
     model.eval()
-    segments = []
+    all_embs = []
     with torch.no_grad():
         for p in paths:
-            seg = _load_mfcc(p, cfg.segment_frames)
-            x = torch.from_numpy(seg).unsqueeze(0).to(device)   # (1, T, 13)
-            emb = model(x).squeeze(0).cpu().numpy()              # (D,)
-            segments.append(emb)
+            audio, sr = _lr.load(str(p), sr=TARGET_SR, mono=True)
+            audio = _pipeline.normalize_audio(audio, sample_rate=TARGET_SR)
+            mfccs = _extract_features(audio)
 
-    return np.mean(segments, axis=0).astype(np.float32)
+            T = mfccs.shape[0]
+            seg_len = cfg.segment_frames
+
+            if T < seg_len:
+                reps = int(np.ceil(seg_len / T))
+                mfccs = np.tile(mfccs, (reps, 1))[:seg_len]
+                T = seg_len
+
+            max_start = T - seg_len
+            if max_start <= 0:
+                starts = [0]
+            else:
+                starts = [int(i * max_start / (n_crops - 1)) for i in range(n_crops)]
+
+            for s in starts:
+                seg = mfccs[s : s + seg_len].astype(np.float32)
+                x = torch.from_numpy(seg).unsqueeze(0).to(device)
+                emb = model(x).squeeze(0).cpu().numpy()
+                all_embs.append(emb)
+
+    return np.mean(all_embs, axis=0).astype(np.float32)
 
 
 def verify(
