@@ -1,0 +1,11 @@
+timestamp,duration,sample_rate,path
+20260409_124052,2.688,16000,data\raw\eval_recordings\eval_liam_001_20260409_124052.wav
+20260409_124108,2.688,16000,data\raw\eval_recordings\eval_liam_002_20260409_124108.wav
+20260409_124119,3.136,16000,data\raw\eval_recordings\eval_liam_003_20260409_124119.wav
+20260409_124130,3.104,16000,data\raw\eval_recordings\eval_liam_004_20260409_124130.wav
+20260409_124140,1.824,16000,data\raw\eval_recordings\eval_liam_005_20260409_124140.wav
+20260409_124154,2.912,16000,data\raw\eval_recordings\eval_liam_006_20260409_124154.wav
+20260409_124201,3.424,16000,data\raw\eval_recordings\eval_liam_007_20260409_124201.wav
+20260409_124210,3.904,16000,data\raw\eval_recordings\eval_liam_008_20260409_124210.wav
+20260409_124219,2.752,16000,data\raw\eval_recordings\eval_liam_009_20260409_124219.wav
+20260409_124228,2.976,16000,data\raw\eval_recordings\eval_liam_010_20260409_124228.wav
