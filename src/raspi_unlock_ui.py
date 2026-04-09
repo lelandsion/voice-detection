@@ -150,36 +150,6 @@ class RaspiVoiceUnlockUI:
         style.configure("Prompt.TLabel", font=("DejaVu Sans", 20, "bold"), foreground="#93c5fd")
         style.configure("State.TLabel", font=("DejaVu Sans", 18, "bold"), foreground="#fbbf24")
 
-        ttk.Label(frame, text="Voice Unlock", style="Title.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 12))
-
-        ttk.Label(frame, text="Model").grid(row=1, column=0, sticky="w")
-        self.model_box = ttk.Combobox(frame, textvariable=self.model_var, state="readonly", width=52)
-        self.model_box.grid(row=1, column=1, columnspan=3, sticky="ew", padx=6)
-        ttk.Button(frame, text="Refresh", command=self._refresh_models).grid(row=1, column=4, sticky="w")
-
-        ttk.Label(frame, text="Speaker").grid(row=2, column=0, sticky="w", pady=(8, 0))
-        self.speaker_box = ttk.Combobox(frame, textvariable=self.speaker_var, state="normal", width=26)
-        self.speaker_box.grid(row=2, column=1, sticky="w", padx=6, pady=(8, 0))
-        ttk.Button(frame, text="Reload", command=self._refresh_speakers).grid(row=2, column=2, sticky="w", pady=(8, 0))
-
-        ttk.Label(frame, text="Threshold").grid(row=2, column=3, sticky="e", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.threshold_var, width=8).grid(row=2, column=4, sticky="w", padx=6, pady=(8, 0))
-
-        ttk.Label(frame, text="Max Sec").grid(row=3, column=0, sticky="w", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.seconds_var, width=8).grid(row=3, column=1, sticky="w", padx=6, pady=(8, 0))
-
-        ttk.Label(frame, text="Reference").grid(row=3, column=2, sticky="e", pady=(8, 0))
-        ttk.Combobox(
-            frame,
-            textvariable=self.ref_mode_var,
-            state="readonly",
-            values=["prompt", "speaker-average", "auto"],
-            width=16,
-        ).grid(row=3, column=3, sticky="w", padx=6, pady=(8, 0))
-
-        ttk.Label(frame, text="Enroll prompts").grid(row=3, column=4, sticky="e", pady=(8, 0))
-        ttk.Entry(frame, textvariable=self.enroll_prompts_var, width=6).grid(row=3, column=5, sticky="w", padx=6, pady=(8, 0))
-
         # Colors
         BG = "#0b1220"
         CARD = "#111827"
@@ -305,19 +275,22 @@ class RaspiVoiceUnlockUI:
             command=self._enroll_async
         ).pack(side="left", padx=5)
 
+        '''
+       
         ttk.Button(
             button_row,
             text="Set Password",
             style="Modern.TButton",
             command=self._set_password_dialog
         ).pack(side="left", padx=5)
-
+        
         ttk.Button(
             button_row,
             text="Password Unlock",
             style="Modern.TButton",
             command=self._password_unlock_dialog
         ).pack(side="left", padx=5)
+        '''
 
         # ===== STATUS =====
         status_row = tk.Frame(inner, bg=CARD)
@@ -483,6 +456,21 @@ class RaspiVoiceUnlockUI:
     def _enroll_async(self) -> None:
         if self._is_busy:
             return
+
+        speaker = self.speaker_var.get().strip()
+
+        if not speaker:
+            speaker = simpledialog.askstring(
+                "Speaker",
+                "Enter speaker name:",
+                parent=self.root
+            )
+            if not speaker:
+                self._set_status("Enrollment cancelled")
+                return
+
+            self.speaker_var.set(speaker)
+
         thread = threading.Thread(target=self._enroll_worker, daemon=True)
         thread.start()
 
@@ -609,7 +597,7 @@ class RaspiVoiceUnlockUI:
                         except RuntimeError as exc:
                             if "No speech detected" in str(exc):
                                 self._set_status(f"{base_msg}: No speech detected — retrying...")
-                                sd.sleep(600)
+                                # d.sleep(600)
                                 continue
                             raise
                         if rec.saved_path is None:
@@ -689,7 +677,7 @@ class RaspiVoiceUnlockUI:
         self._refresh_speakers()
         self.speaker_var.set(speaker)
         self._new_prompt()
-        messagebox.showinfo("Enrollment", f"Enrollment saved for '{speaker}'.")
+        # messagebox.showinfo("Enrollment", f"Enrollment saved for '{speaker}'.")
 
     def _set_status(self, text: str) -> None:
         def update():
