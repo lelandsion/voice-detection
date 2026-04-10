@@ -17,3 +17,13 @@ timestamp,duration,sample_rate,path
 20260409_203736,2.112,16000,data\raw\eval_recordings\eval_hutch_008_20260409_203736.wav
 20260409_203748,1.76,16000,data\raw\eval_recordings\eval_hutch_009_20260409_203748.wav
 20260409_203802,3.488,16000,data\raw\eval_recordings\eval_hutch_010_20260409_203802.wav
+20260409_204107,3.936,16000,data\raw\eval_recordings\eval_liam_externalmic_001_20260409_204107.wav
+20260409_204122,4.608,16000,data\raw\eval_recordings\eval_liam_externalmic_002_20260409_204122.wav
+20260409_204137,4.16,16000,data\raw\eval_recordings\eval_liam_externalmic_003_20260409_204137.wav
+20260409_204147,4.224,16000,data\raw\eval_recordings\eval_liam_externalmic_004_20260409_204147.wav
+20260409_204200,4.32,16000,data\raw\eval_recordings\eval_liam_externalmic_005_20260409_204200.wav
+20260409_204210,4.384,16000,data\raw\eval_recordings\eval_liam_externalmic_006_20260409_204210.wav
+20260409_204221,3.584,16000,data\raw\eval_recordings\eval_liam_externalmic_007_20260409_204221.wav
+20260409_204228,1.184,16000,data\raw\eval_recordings\eval_liam_externalmic_008_20260409_204228.wav
+20260409_204237,2.048,16000,data\raw\eval_recordings\eval_liam_externalmic_009_20260409_204237.wav
+20260409_204249,4.224,16000,data\raw\eval_recordings\eval_liam_externalmic_010_20260409_204249.wav
