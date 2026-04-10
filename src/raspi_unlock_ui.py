@@ -18,10 +18,10 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
 import torch
 
-ENROLL_PROMPTS = 5
+ENROLL_PROMPTS = 3
 ENROLL_TAKES = 3
 REFERENCE_MODE = "speaker-average"
-THRESHOLD = 0.40
+THRESHOLD = 0.31
 
 try:
     from .audio import MicrophoneRecorder
