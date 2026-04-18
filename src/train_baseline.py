@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-DEFAULT_FEATURE_CSV = Path("data/feature_cache_mozilla.csv")
+DEFAULT_FEATURE_CSV = Path("../data/feature_cache_mozilla.csv")
 DEFAULT_OUTPUT_DIR  = Path("data/processed/baseline")
 MIN_UTTERANCES      = 5
 VAL_RATIO           = 0.20
@@ -92,6 +92,112 @@ def compute_cv_scores(model, X, y, n_splits=5):
         rows.append({"fold": i + 1, "accuracy": float(score)})
     return pd.DataFrame(rows)
 
+
+def evaluate_robustness(model, X_test, y_test, snr_levels=[20, 10, 5, 0]):
+    """Calculates Accuracy, FAR, FRR, and EER across multiple noise levels."""
+    robustness_details = {}
+
+    for snr in snr_levels:
+        # 1. Apply noise
+        noise_std = 1.0 / (10 ** (snr / 20))
+        X_noisy = X_test + np.random.normal(0, noise_std, X_test.shape)
+
+        # 2. Get predictions
+        y_pred = model.predict(X_noisy)
+        acc = accuracy_score(y_test, y_pred)
+
+        # 3. Calculate FAR, FRR (using confusion matrix for speaker ID)
+        cm = confusion_matrix(y_test, y_pred)
+        fp = cm.sum(axis=0) - np.diag(cm)
+        fn = cm.sum(axis=1) - np.diag(cm)
+        tp = np.diag(cm)
+        tn = cm.sum() - (fp + fn + tp)
+
+        # Average rates across all speakers
+        far = np.mean(fp / (fp + tn)) if any(fp + tn > 0) else 0
+        frr = np.mean(fn / (fn + tp)) if any(fn + tp > 0) else 0
+        eer = (far + frr) / 2
+
+        # Store in a private sub-map
+        robustness_details[snr] = {
+            "acc": float(acc),
+            "far": float(far),
+            "frr": float(frr),
+            "eer": float(eer)
+        }
+        print(f"  SNR {snr:2d}dB | Acc: {acc:.4f} | EER: {eer:.4f}")
+
+    return robustness_details
+
+
+import matplotlib.pyplot as plt
+
+
+def generate_visualizations(lc_df, robustness_results, output_dir):
+    paths = {}
+
+    # Plot 1: Learning Curve
+    plt.figure(figsize=(10, 5))
+    plt.plot(lc_df["train_size"], lc_df["val_mean"], label="Validation Acc", marker='o')
+    plt.fill_between(lc_df["train_size"], lc_df["val_mean"] - lc_df["val_std"],
+                     lc_df["val_mean"] + lc_df["val_std"], alpha=0.2)
+    plt.title("Model Stability (Australian Speaker ID)")
+    plt.xlabel("Number of Training Samples")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    lc_plot = output_dir / "learning_curve.png"
+    plt.savefig(lc_plot)
+    paths["learning_curve"] = str(lc_plot)
+
+    # Plot 2: Noise Robustness
+    plt.figure(figsize=(10, 5))
+
+    # GET THE SNRs (the keys: 20, 10, 5, 0)
+    snrs = list(robustness_results.keys())
+
+    # EXTRACT ONLY THE 'acc' VALUES from the dictionaries
+    # This prevents the "unhashable type: 'dict'" error
+    accs = [robustness_results[s]['acc'] for s in snrs]
+
+    plt.plot(snrs, accs, color='red', marker='x')
+    plt.gca().invert_xaxis()  # High SNR to Low SNR
+    plt.title("Accuracy vs. Environmental Noise (SNR)")
+    plt.xlabel("Signal-to-Noise Ratio (dB) - Lower is Noisier")
+    plt.ylabel("Accuracy")
+    plt.grid(True)
+
+    noise_plot = output_dir / "noise_robustness.png"
+    plt.savefig(noise_plot)
+    paths["noise_plot"] = str(noise_plot)
+
+    plt.close('all')
+    return paths
+
+
+from sklearn.metrics import confusion_matrix
+
+
+def compute_verification_metrics(y_true, y_pred):
+    """Calculates FAR and FRR from a multiclass confusion matrix"""
+    cm = confusion_matrix(y_true, y_pred)
+
+    # For multiclass, we average the per-class rates
+    # False Rejection: Type I Error (True is Positive, but we said Negative)
+    # False Acceptance: Type II Error (True is Negative, but we said Positive)
+
+    fp = cm.sum(axis=0) - np.diag(cm)
+    fn = cm.sum(axis=1) - np.diag(cm)
+    tp = np.diag(cm)
+    tn = cm.sum() - (fp + fn + tp)
+
+    # Avoid division by zero
+    far = np.mean(fp / (fp + tn)) if any(fp + tn > 0) else 0
+    frr = np.mean(fn / (fn + tp)) if any(fn + tp > 0) else 0
+
+    # EER is roughly the average for this baseline
+    eer = (far + frr) / 2
+
+    return float(far), float(frr), float(eer)
 
 #  core training function 
 
@@ -171,6 +277,14 @@ def train_baseline(
     for _, row in cv_df.iterrows():
         print(f"  fold {int(row['fold'])}: {row['accuracy']:.4f}")
 
+    # 5c. New: Robustness Evaluation
+    print("\nEvaluating robustness under simulated noise...")
+    robustness_results = evaluate_robustness(model, X_val_sc, y_val)
+
+    # 5d. New: Visualization
+    print("\nGenerating performance visualizations...")
+    plot_paths = generate_visualizations(lc_df, robustness_results, output_dir)
+
     #  6. final evaluation 
     print("\nFinal evaluation on held-out validation set …")
     y_pred_tr  = model.predict(X_tr_sc)
@@ -186,9 +300,18 @@ def train_baseline(
     print(f"  Val   accuracy : {val_acc:.4f}  (top-5: {top5_acc:.4f})")
     print(f"  Train-val gap  : {gap:.4f}{'  ← potential overfit' if gap > 0.10 else ''}")
 
-    report_str  = classification_report(y_val, y_pred_val,
-                                        target_names=[str(c) for c in le.classes_],
-                                        zero_division=0)
+    # Find which labels actually exist in the validation set
+    present_classes = np.unique(y_val)
+    # Filter the original class names to match only what's in y_val
+    target_names = [str(le.classes_[i]) for i in present_classes]
+
+    report_str = classification_report(
+        y_val,
+        y_pred_val,
+        labels=present_classes,  # Tell sklearn exactly which labels to report on
+        target_names=target_names,
+        zero_division=0
+    )
     report_path = output_dir / "classification_report.txt"
     report_path.write_text(report_str, encoding="utf-8")
  
@@ -225,7 +348,7 @@ def train_baseline(
     print("  baseline_results.json  — metrics summary")
     print("  learning_curve.csv     — stability evidence")
     print("  cv_results.csv         — cross-validation consistency")
-    return results
+    return results, robustness_results
 
 
 def _parse_args():
@@ -242,18 +365,58 @@ def _parse_args():
 
 if __name__ == "__main__":
     args = _parse_args()
-    results = train_baseline(
-        csv_path=args.feature_csv,
-        output_dir=args.output_dir,
-        min_utterances=args.min_utterances,
-        val_ratio=args.val_ratio,
-        C=args.C,
-        max_iter=args.max_iter,
-        random_state=args.random_state,
-    )
-    print(
-        f"\nSummary — val_acc={results['val_accuracy']:.4f}  "
-        f"top5={results['top5_val_accuracy']:.4f}  "
-        f"cv={results['cv_mean_accuracy']:.4f}±{results['cv_std_accuracy']:.4f}  "
-        f"stable={results['learning_curve_stable']}"
-    )
+
+    # EXPERIMENT 1: How much data per speaker do we need?
+    test_scenarios = [3, 5, 10, 15]
+    all_experiment_results = []
+
+    print(f" Starting Australian Accent Baseline Experiments...")
+
+    for min_u in test_scenarios:
+        print(f"\n--- Testing Min Utterances: {min_u} ---")
+        run_output = args.output_dir / f"min_u_{min_u}"
+
+        # We unpack the tuple here: res (the map) and rob (the noise details)
+        res, rob = train_baseline(
+            csv_path=args.feature_csv,
+            output_dir=run_output,
+            min_utterances=min_u,
+            val_ratio=args.val_ratio,
+            C=args.C,
+            max_iter=args.max_iter,
+            random_state=args.random_state,
+        )
+        all_experiment_results.append((res, rob))
+
+    # TABLE 1: Accuracy & Speaker Scaling
+    print("\n" + "=" * 60)
+    print("SUCCESS RATE SUMMARY: SPEAKER SCALING")
+    print("=" * 60)
+    print(f"{'Min_U':<6} | {'Speakers':<10} | {'Val_Acc':<10} | {'Top-5':<10} | {'Stable'}")
+
+    for res, rob in all_experiment_results:
+        print(
+            f"{res['min_utterances']:<6} | "
+            f"{res['n_speakers']:<10} | "
+            f"{res['val_accuracy']:.4f}     | "
+            f"{res['top5_val_accuracy']:.4f}     | "
+            f"{res['learning_curve_stable']}"
+        )
+
+    # TABLE 2: Noise Robustness (Completion Criteria Evidence)
+    # Get the results from the final (usually most accurate) run
+    final_res, final_rob = all_experiment_results[-1]
+
+    print("\n" + "=" * 60)
+    print(f"NOISE DEGRADATION REPORT (Min_U: {final_res['min_utterances']})")
+    print("=" * 60)
+    print(f"{'SNR':<6} | {'Accuracy':<10} | {'FAR':<10} | {'FRR':<10} | {'EER':<10}")
+
+    for snr, metrics in final_rob.items():
+        print(
+            f"{snr:<6} | "
+            f"{metrics['acc']:.4f}     | "
+            f"{metrics['far']:.4f}     | "
+            f"{metrics['frr']:.4f}     | "
+            f"{metrics['eer']:.4f}"
+        )
