@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-DEFAULT_FEATURE_CSV = Path("data/feature_cache_mozilla.csv")
+DEFAULT_FEATURE_CSV = Path("../data/feature_cache_mozilla.csv")
 DEFAULT_OUTPUT_DIR  = Path("data/processed/baseline")
 MIN_UTTERANCES      = 5
 VAL_RATIO           = 0.20
@@ -91,6 +91,58 @@ def compute_cv_scores(model, X, y, n_splits=5):
     for i, score in enumerate(scores):
         rows.append({"fold": i + 1, "accuracy": float(score)})
     return pd.DataFrame(rows)
+
+
+def evaluate_robustness(model, X_test, y_test, snr_levels=[20, 10, 5, 0]):
+    results = {}
+    for snr in snr_levels:
+        # Calculate noise scale based on SNR
+        # Higher SNR = lower noise_std
+        noise_std = 1.0 / (10 ** (snr / 20))
+        X_noisy = X_test + np.random.normal(0, noise_std, X_test.shape)
+
+        preds = model.predict(X_noisy)
+        acc = accuracy_score(y_test, preds)
+        results[snr] = float(acc)
+        print(f"  SNR {snr:2d}dB | Accuracy: {acc:.4f}")
+    return results
+
+
+import matplotlib.pyplot as plt
+
+
+def generate_visualizations(lc_df, robustness_results, output_dir):
+    paths = {}
+
+    # Plot 1: Learning Curve
+    plt.figure(figsize=(10, 5))
+    plt.plot(lc_df["train_size"], lc_df["val_mean"], label="Validation Acc", marker='o')
+    plt.fill_between(lc_df["train_size"], lc_df["val_mean"] - lc_df["val_std"],
+                     lc_df["val_mean"] + lc_df["val_std"], alpha=0.2)
+    plt.title("Model Stability (Australian Speaker ID)")
+    plt.xlabel("Number of Training Samples")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    lc_plot = output_dir / "learning_curve.png"
+    plt.savefig(lc_plot)
+    paths["learning_curve"] = str(lc_plot)
+
+    # Plot 2: Noise Robustness
+    plt.figure(figsize=(10, 5))
+    snrs = list(robustness_results.keys())
+    accs = list(robustness_results.values())
+    plt.plot(snrs, accs, color='red', marker='x')
+    plt.gca().invert_xaxis()  # High SNR to Low SNR
+    plt.title("Accuracy vs. Environmental Noise (SNR)")
+    plt.xlabel("Signal-to-Noise Ratio (dB) - Lower is Noisier")
+    plt.ylabel("Accuracy")
+    plt.grid(True)
+    noise_plot = output_dir / "noise_robustness.png"
+    plt.savefig(noise_plot)
+    paths["noise_plot"] = str(noise_plot)
+
+    plt.close('all')
+    return paths
 
 
 #  core training function 
@@ -171,6 +223,14 @@ def train_baseline(
     for _, row in cv_df.iterrows():
         print(f"  fold {int(row['fold'])}: {row['accuracy']:.4f}")
 
+    # 5c. New: Robustness Evaluation
+    print("\nEvaluating robustness under simulated noise...")
+    robustness_results = evaluate_robustness(model, X_val_sc, y_val)
+
+    # 5d. New: Visualization
+    print("\nGenerating performance visualizations...")
+    plot_paths = generate_visualizations(lc_df, robustness_results, output_dir)
+
     #  6. final evaluation 
     print("\nFinal evaluation on held-out validation set …")
     y_pred_tr  = model.predict(X_tr_sc)
@@ -186,9 +246,18 @@ def train_baseline(
     print(f"  Val   accuracy : {val_acc:.4f}  (top-5: {top5_acc:.4f})")
     print(f"  Train-val gap  : {gap:.4f}{'  ← potential overfit' if gap > 0.10 else ''}")
 
-    report_str  = classification_report(y_val, y_pred_val,
-                                        target_names=[str(c) for c in le.classes_],
-                                        zero_division=0)
+    # Find which labels actually exist in the validation set
+    present_classes = np.unique(y_val)
+    # Filter the original class names to match only what's in y_val
+    target_names = [str(le.classes_[i]) for i in present_classes]
+
+    report_str = classification_report(
+        y_val,
+        y_pred_val,
+        labels=present_classes,  # Tell sklearn exactly which labels to report on
+        target_names=target_names,
+        zero_division=0
+    )
     report_path = output_dir / "classification_report.txt"
     report_path.write_text(report_str, encoding="utf-8")
  
@@ -257,3 +326,40 @@ if __name__ == "__main__":
         f"cv={results['cv_mean_accuracy']:.4f}±{results['cv_std_accuracy']:.4f}  "
         f"stable={results['learning_curve_stable']}"
     )
+
+    rgs = _parse_args()
+
+    # EXPERIMENT 1: How much data per speaker do we need?
+    test_scenarios = [3, 5, 10, 15]
+    all_experiment_results = []
+
+    print(f" Starting Australian Accent Baseline Experiments...")
+
+    for min_u in test_scenarios:
+        print(f"\n--- Testing with Min Utterances: {min_u} ---")
+
+        # Create a specific folder for this run
+        run_output = args.output_dir / f"min_u_{min_u}"
+
+        results = train_baseline(
+            csv_path=args.feature_csv,
+            output_dir=run_output,
+            min_utterances=min_u,
+            val_ratio=args.val_ratio,
+            C=args.C,
+            max_iter=args.max_iter,
+            random_state=args.random_state,
+        )
+        all_experiment_results.append(results)
+
+    # 📊 FINAL SUMMARY TABLE
+    print("\n" + "=" * 50)
+    print("FINAL EXPERIMENT SUMMARY (SUCCESS RATES)")
+    print("=" * 50)
+    print(f"{'Min_U':<10} | {'Speakers':<10} | {'Val_Acc':<10} | {'Top-5':<10}")
+
+    for r in all_experiment_results:
+        print(
+            f"{r['min_utterances']:<10} | {r['n_speakers']:<10} | {r['val_accuracy']:.4f}     | {r['top5_val_accuracy']:.4f}")
+
+
